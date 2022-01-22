@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Reviews
+namespace ModuleManager.Pages.LearningContents
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
@@ -15,27 +15,27 @@ namespace ModuleManager.Pages.Reviews
         public DeleteModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
 
         [BindProperty]
-        public ModuleManager.Models.Review Review { get; set; }
+        public ModuleManager.Models.LearningContent LearningContent { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Review? _module = await Context.Review.FirstOrDefaultAsync(
-                                                 m => m.ReviewId == id);
+            ModuleManager.Models.LearningContent? _module = await Context.LearningContent.FirstOrDefaultAsync(
+                                                 m => m.LearningContentId == id);
 
             if (_module == null)
             {
                 return NotFound();
             }
-            Review = _module;
+            LearningContent = _module;
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                     User, Review,
+                                                     User, LearningContent,
                                                      ModuleOperations.Delete);
             if (!isAuthorized.Succeeded)
             {
@@ -47,24 +47,24 @@ namespace ModuleManager.Pages.Reviews
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
-            var review = await Context
-                .Review.AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
+            var learningContent = await Context
+                .LearningContent.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.LearningContentId == id);
 
-            if (review == null)
+            if (learningContent == null)
             {
                 return NotFound();
             }
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                     User, review,
+                                                     User, learningContent,
                                                      ModuleOperations.Delete);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
 
-            Context.Review.Remove(review);
+            Context.LearningContent.Remove(learningContent);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

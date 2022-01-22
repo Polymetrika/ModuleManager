@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using ModuleManager.Models;
 
 namespace ModuleManager.Pages.Modules
 {
@@ -9,12 +10,12 @@ namespace ModuleManager.Pages.Modules
     {
         protected ApplicationDbContext Context { get; }
         protected IAuthorizationService AuthorizationService { get; }
-        protected UserManager<IdentityUser> UserManager { get; }
+        protected UserManager<ApplicationUser> UserManager { get; }
 
         public DI_BasePageModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager) : base()
+            UserManager<ApplicationUser> userManager) : base()
         {
             Context = context;
             UserManager = userManager;

@@ -9,17 +9,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Reviews
+namespace ModuleManager.Pages.LearningContents
 {
     public class CreateModel : DI_BasePageModel
     {
         public CreateModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
-            Templates = context.Templates.AsNoTracking().Where(a => a.TemplateType == TemplateType.Review).Select(a =>
+            Templates = context.Templates.AsNoTracking().Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.TemplateID.ToString(),
@@ -34,7 +34,7 @@ namespace ModuleManager.Pages.Reviews
         }
 
         [BindProperty]
-        public ModuleManager.Models.Review Review { get; set; }
+        public ModuleManager.Models.LearningContent LearningContent { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -43,18 +43,18 @@ namespace ModuleManager.Pages.Reviews
                 return Page();
             }
 
-            Review.OwnerID = UserManager.GetUserId(User);
+            LearningContent.OwnerID = UserManager.GetUserId(User);
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                        User, Review,
+                                                        User, LearningContent,
                                                         ModuleOperations.Create);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
 
-            Review.TimeStamp = DateTime.UtcNow;
-            Context.Review.Add(Review);
+            LearningContent.TimeStamp = DateTime.UtcNow;
+            Context.LearningContent.Add(LearningContent);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

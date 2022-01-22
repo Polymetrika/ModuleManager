@@ -1,11 +1,11 @@
 @page
-@model ModuleManager.Pages.Reviews.IndexModel
+@model ModuleManager.Pages.LearningContents.IndexModel
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Review Index</h1>
+<h1>LearningContent Index</h1>
 
 <p>
     <a asp-page="Create">Create New</a>
@@ -14,22 +14,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Review[0].Name)
+                @Html.DisplayNameFor(model => model.LearningContent[0].Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Review[0].TimeStamp)
+                @Html.DisplayNameFor(model => model.LearningContent[0].TimeStamp)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Review[0].TemplateId)
+                @Html.DisplayNameFor(model => model.LearningContent[0].TemplateId)
             </th>
              <th>
-                @Html.DisplayNameFor(model => model.Review[0].Status)
+                @Html.DisplayNameFor(model => model.LearningContent[0].Status)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Review) {
+@foreach (var item in Model.LearningContent) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -48,18 +48,18 @@
                      User, item,
                      ModuleOperations.Update)).Succeeded)
                     {
-                        <a asp-page="./Edit" asp-route-id="@item.ReviewId">Edit</a>
+                        <a asp-page="./Edit" asp-route-id="@item.LearningContentId">Edit</a>
                         <text> | </text>
                     }
 
-                    <a asp-page="./Details" asp-route-id="@item.ReviewId">Details</a>
+                    <a asp-page="./Details" asp-route-id="@item.LearningContentId">Details</a>
 
                     @if ((await AuthorizationService.AuthorizeAsync(
                      User, item,
                      ModuleOperations.Delete)).Succeeded)
                     {
                         <text> | </text>
-                        <a asp-page="./Delete" asp-route-id="@item.ReviewId">Delete</a>
+                        <a asp-page="./Delete" asp-route-id="@item.LearningContentId">Delete</a>
                     }
                 </td>
             </tr>

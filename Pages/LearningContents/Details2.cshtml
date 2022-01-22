@@ -1,0 +1,43 @@
+@page "{id:int}"
+@model ModuleManager.Pages.LearningContents.Details2Model
+
+@{
+    ViewData["Title"] = "Details2";
+}
+
+<h2>Details2</h2>
+
+<div>
+    <h4>LearningContent</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.LearningContent.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LearningContent.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LearningContent.Details)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LearningContent.Details)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LearningContent.TemplateId)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LearningContent.TemplateId)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LearningContent.Status)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LearningContent.Status)
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Reviews
+namespace ModuleManager.Pages.LearningContents
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
@@ -16,29 +16,29 @@ namespace ModuleManager.Pages.Reviews
         public EditModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
 
         [BindProperty]
-        public ModuleManager.Models.Review Review { get; set; }
+        public ModuleManager.Models.LearningContent LearningContent { get; set; }
         [BindProperty]
         public string Template { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Review? review = await Context.Review.FirstOrDefaultAsync(
-                                                             m => m.ReviewId == id);
-            if (review == null)
+            ModuleManager.Models.LearningContent? learningContent = await Context.LearningContent.FirstOrDefaultAsync(
+                                                             m => m.LearningContentId == id);
+            if (learningContent == null)
             {
                 return NotFound();
             }
 
-            Review = review;
-            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == Review.TemplateId)).Details;
+            LearningContent = learningContent;
+            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == LearningContent.TemplateId)).Details;
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                      User, Review,
+                                                      User, LearningContent,
                                                       ModuleOperations.Update);
             if (!isAuthorized.Succeeded)
             {
@@ -55,41 +55,41 @@ namespace ModuleManager.Pages.Reviews
                 return Page();
             }
 
-            // Fetch Review from DB to get OwnerID.
-            var review = await Context
-                .Review.AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
+            // Fetch LearningContent from DB to get OwnerID.
+            var learningContent = await Context
+                .LearningContent.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.LearningContentId == id);
 
-            if (review == null)
+            if (learningContent == null)
             {
                 return NotFound();
             }
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                     User, review,
+                                                     User, learningContent,
                                                      ModuleOperations.Update);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
 
-            Review.OwnerID = review.OwnerID;
-            Review.TimeStamp = DateTime.UtcNow;
-            Context.Attach(Review).State = EntityState.Modified;
+            LearningContent.OwnerID = learningContent.OwnerID;
+            LearningContent.TimeStamp = DateTime.UtcNow;
+            Context.Attach(LearningContent).State = EntityState.Modified;
 
-            if (Review.Status == ReviewStatus.Approved)
+            if (LearningContent.Status == LearningContentStatus.Approved)
             {
-                // If the review is updated after approval, 
+                // If the learningContent is updated after approval, 
                 // and the user cannot approve,
                 // set the status back to submitted so the update can be
                 // checked and approved.
                 var canApprove = await AuthorizationService.AuthorizeAsync(User,
-                                        Review,
+                                        LearningContent,
                                         ModuleOperations.Approve);
 
                 if (!canApprove.Succeeded)
                 {
-                    Review.Status = ReviewStatus.Submitted;
+                    LearningContent.Status = LearningContentStatus.Submitted;
                 }
             }
 

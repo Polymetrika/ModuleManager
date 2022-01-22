@@ -9,9 +9,9 @@ namespace ModuleManager.Authorization
     public class ModuleIsOwnerAuthorizationHandler
                 : AuthorizationHandler<OperationAuthorizationRequirement, Module>
     {
-        UserManager<IdentityUser> _userManager;
+        UserManager<ApplicationUser> _userManager;
 
-        public ModuleIsOwnerAuthorizationHandler(UserManager<IdentityUser> 
+        public ModuleIsOwnerAuthorizationHandler(UserManager<ApplicationUser> 
             userManager)
         {
             _userManager = userManager;

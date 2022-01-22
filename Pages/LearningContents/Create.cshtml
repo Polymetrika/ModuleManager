@@ -1,5 +1,5 @@
 @page
-@model ModuleManager.Pages.Reviews.CreateModel
+@model ModuleManager.Pages.LearningContents.CreateModel
 
 @{
     ViewData["Title"] = "Create";
@@ -7,27 +7,27 @@
 
 <h1>Create</h1>
 
-<h4>Review</h4>
+<h4>LearningContent</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Review.Name" class="control-label"></label>
-                <input asp-for="Review.Name" class="form-control" />
-                <span asp-validation-for="Review.Name" class="text-danger"></span>
+                <label asp-for="LearningContent.Name" class="control-label"></label>
+                <input asp-for="LearningContent.Name" class="form-control" />
+                <span asp-validation-for="LearningContent.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Review.TemplateId" class="control-label"></label>
-                @Html.DropDownListFor(m => m.Review.TemplateId, Model.Templates,"Select a Template",
+                <label asp-for="LearningContent.TemplateId" class="control-label"></label>
+                @Html.DropDownListFor(m => m.LearningContent.TemplateId, Model.Templates,"Select a Template",
                     new {
                       @class = "form-control selectpicker",
                       data_width = "auto",
                       data_live_search = "true",
                     //data_show_subtext = "true",
                 })
-                <span asp-validation-for="Review.TemplateId" class="text-danger"></span>
+                <span asp-validation-for="LearningContent.TemplateId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

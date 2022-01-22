@@ -3,54 +3,41 @@ using ModuleManager.Data;
 using ModuleManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Reviews
+namespace ModuleManager.Pages.LearningContents
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
-    [AllowAnonymous]
-    public class Details2Model : DI_BasePageModel
+    public class IndexModel : DI_BasePageModel
     {
-        public Details2Model(
+        public IndexModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<IdentityUser> userManager)
+            UserManager<ApplicationUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
 
-        public ModuleManager.Models.Review Review { get; set; }
+        public IList<ModuleManager.Models.LearningContent> LearningContent { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task OnGetAsync()
         {
-            ModuleManager.Models.Review? _module = await Context.Review.FirstOrDefaultAsync(m => m.ReviewId == id);
-
-            if (_module == null)
-            {
-                return NotFound();
-            }
-            Review = _module;
-
-            if (!User.Identity!.IsAuthenticated)
-            {
-                return Challenge();
-            }
-
+            var learningContents = Context.LearningContent.AsNoTracking().Join(Context.Templates, a => a.TemplateId, b => b.TemplateID, (a, b) => new LearningContent { LearningContentId=a.LearningContentId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 
             var currentUserId = UserManager.GetUserId(User);
 
-            if (!isAuthorized
-                && currentUserId != Review.OwnerID
-                && Review.Status != ReviewStatus.Approved)
+            // Only approved learningContents are shown UNLESS you're authorized to see them
+            // or you are the owner.
+            if (!isAuthorized)
             {
-                return Forbid();
+                learningContents = learningContents.Where(c => c.Status == LearningContentStatus.Approved
+                                            || c.OwnerID == currentUserId);
             }
 
-            return Page();
+            LearningContent = await learningContents.ToListAsync();
         }
     }
     #endregion

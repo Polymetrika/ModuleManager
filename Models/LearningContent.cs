@@ -3,9 +3,9 @@
 namespace ModuleManager.Models
 {
     #region snippet1
-    public class Review
+    public class LearningContent
     {
-        public int ReviewId { get; set; }
+        public int LearningContentId { get; set; }
 
         // user ID from AspNetUser table.
         public string? OwnerID { get; set; }
@@ -14,12 +14,21 @@ namespace ModuleManager.Models
         public string? Details { get; set; }
         public string? TemplateId { get; set; }
         public DateTime TimeStamp { get; set; }
+        public LearningContentType Type { get; set; }
 
-        public ReviewStatus Status { get; set; }
+        public LearningContentStatus Status { get; set; }
         
     }
-
-    public enum ReviewStatus
+    public enum LearningContentType
+    {
+        Module=1,
+        Review=2,
+        Assessment=3,
+        Media=4,
+        CommunityEngagement=5,
+        StageGate=6
+    }
+    public enum LearningContentStatus
     {
         Submitted,
         Approved,

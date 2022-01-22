@@ -1,5 +1,5 @@
 @page
-@model ModuleManager.Pages.Reviews.EditModel
+@model ModuleManager.Pages.LearningContents.EditModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -9,24 +9,24 @@
 
 <h1>Edit</h1>
 
-<h4>Review</h4>
+<h4>LearningContent</h4>
 <hr />
 <div class="row">
     <div class="flex-container">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Review.ReviewId" />
+            <input type="hidden" asp-for="LearningContent.LearningContentId" />
             <div class="form-group">
-                <label asp-for="Review.Name" class="control-label"></label>
-                <input asp-for="Review.Name" class="form-control" />
-                <span asp-validation-for="Review.Name" class="text-danger"></span>
+                <label asp-for="LearningContent.Name" class="control-label"></label>
+                <input asp-for="LearningContent.Name" class="form-control" />
+                <span asp-validation-for="LearningContent.Name" class="text-danger"></span>
             </div>
             
             <div class="form-group">
-                <label asp-for="Review.Details" class="control-label"></label>
+                <label asp-for="LearningContent.Details" class="control-label"></label>
                 <div id='formio'></div>
-                <input asp-for="Review.Details" class="hidden" />
-                <span asp-validation-for="Review.Details" class="text-danger"></span>
+                <input asp-for="LearningContent.Details" class="hidden" />
+                <span asp-validation-for="LearningContent.Details" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -47,7 +47,7 @@
     <script type='text/javascript'>
       window.onload = function() {
         Formio.createForm(document.getElementById('formio'), @Html.Raw(Model.Template)).then((form) => {
-          let modeldata=JSON.parse('@Html.Raw(Model.Review.Details)'||'{}');
+          let modeldata=JSON.parse('@Html.Raw(Model.LearningContent.Details)'||'{}');
           form.submission = {
             data:  modeldata
           };

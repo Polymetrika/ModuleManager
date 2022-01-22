@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Modules
+namespace ModuleManager.Pages.LearningContents
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
@@ -21,17 +21,17 @@ namespace ModuleManager.Pages.Modules
         {
         }
 
-        public ModuleManager.Models.Module Module { get; set; }
+        public ModuleManager.Models.LearningContent LearningContent { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? _module = await Context.Module.FirstOrDefaultAsync(m => m.ModuleId == id);
+            ModuleManager.Models.LearningContent? _module = await Context.LearningContent.FirstOrDefaultAsync(m => m.LearningContentId == id);
 
             if (_module == null)
             {
                 return NotFound();
             }
-            Module = _module;
+            LearningContent = _module;
 
             if (!User.Identity!.IsAuthenticated)
             {
@@ -44,8 +44,8 @@ namespace ModuleManager.Pages.Modules
             var currentUserId = UserManager.GetUserId(User);
 
             if (!isAuthorized
-                && currentUserId != Module.OwnerID
-                && Module.Status != ModuleStatus.Approved)
+                && currentUserId != LearningContent.OwnerID
+                && LearningContent.Status != LearningContentStatus.Approved)
             {
                 return Forbid();
             }
