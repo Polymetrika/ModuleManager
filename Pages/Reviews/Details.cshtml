@@ -1,5 +1,5 @@
 @page
-@model ModuleManager.Pages.Modules.DetailsModel
+@model ModuleManager.Pages.Reviews.DetailsModel
 
 @{
     ViewData["Title"] = "Details";
@@ -8,59 +8,59 @@
 <h1>Details</h1>
 
 <div>
-    <h4>Module</h4>
+    <h4>Review</h4>
     <hr />
         <div class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Module.TemplateId) : 
-            @Html.DisplayFor(model => model.Module.TemplateId)
+            @Html.DisplayNameFor(model => model.Review.TemplateId) : 
+            @Html.DisplayFor(model => model.Review.TemplateId)
         </div>
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Module.Name)
+            @Html.DisplayNameFor(model => model.Review.Name)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Module.Name)
+            @Html.DisplayFor(model => model.Review.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Module.Details)
+            @Html.DisplayNameFor(model => model.Review.Details)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Module.Details)
+            @Html.DisplayFor(model => model.Review.Details)
         </dd>
         <!-- <snippet> -->
         @*Precedng markup omitted for brevity.*@
     <dt>
-            @Html.DisplayNameFor(model => model.Module.Status)
+            @Html.DisplayNameFor(model => model.Review.Status)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Module.Status)
+            @Html.DisplayFor(model => model.Review.Status)
         </dd>
     </dl>
 </div>
 
         
             <button type="submit" class="btn btn-xs btn-primary">Review</button>
-@if (Model.Module.Status != ModuleStatus.Approved)
+@if (Model.Review.Status != ReviewStatus.Approved)
 {
     @if ((await AuthorizationService.AuthorizeAsync(
-     User, Model.Module, ModuleOperations.Approve)).Succeeded)
+     User, Model.Review, ModuleOperations.Approve)).Succeeded)
     {
         <form style="display:inline;" method="post">
-            <input type="hidden" name="id" value="@Model.Module.ModuleId" />
-            <input type="hidden" name="status" value="@ModuleStatus.Approved" />
+            <input type="hidden" name="id" value="@Model.Review.ReviewId" />
+            <input type="hidden" name="status" value="@ReviewStatus.Approved" />
             <button type="submit" class="btn btn-xs btn-success">Approve</button>
         </form>
     }
 }
 
-@if (Model.Module.Status != ModuleStatus.Rejected)
+@if (Model.Review.Status != ReviewStatus.Rejected)
 {
     @if ((await AuthorizationService.AuthorizeAsync(
-     User, Model.Module, ModuleOperations.Reject)).Succeeded)
+     User, Model.Review, ModuleOperations.Reject)).Succeeded)
     {
         <form style="display:inline;" method="post">
-            <input type="hidden" name="id" value="@Model.Module.ModuleId" />
-            <input type="hidden" name="status" value="@ModuleStatus.Rejected" />
+            <input type="hidden" name="id" value="@Model.Review.ReviewId" />
+            <input type="hidden" name="status" value="@ReviewStatus.Rejected" />
             <button type="submit" class="btn btn-xs btn-danger">Reject</button>
         </form>
     }
@@ -68,10 +68,10 @@
 
 <div>
     @if ((await AuthorizationService.AuthorizeAsync(
-         User, Model.Module,
+         User, Model.Review,
          ModuleOperations.Update)).Succeeded)
     {
-        <a asp-page="./Edit" asp-route-id="@Model.Module.ModuleId">Edit</a>
+        <a asp-page="./Edit" asp-route-id="@Model.Review.ReviewId">Edit</a>
         <text> | </text>
     }
     <a asp-page="./Index">Back to List</a>

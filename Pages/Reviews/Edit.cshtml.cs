@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Modules
+namespace ModuleManager.Pages.Reviews
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
@@ -22,23 +22,23 @@ namespace ModuleManager.Pages.Modules
         }
 
         [BindProperty]
-        public ModuleManager.Models.Module Module { get; set; }
+        public ModuleManager.Models.Review Review { get; set; }
         [BindProperty]
         public string Template { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? module = await Context.Module.FirstOrDefaultAsync(
-                                                             m => m.ModuleId == id);
-            if (module == null)
+            ModuleManager.Models.Review? review = await Context.Review.FirstOrDefaultAsync(
+                                                             m => m.ReviewId == id);
+            if (review == null)
             {
                 return NotFound();
             }
 
-            Module = module;
-            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == Module.TemplateId)).Details;
+            Review = review;
+            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == Review.TemplateId)).Details;
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                      User, Module,
+                                                      User, Review,
                                                       ModuleOperations.Update);
             if (!isAuthorized.Succeeded)
             {
@@ -55,41 +55,41 @@ namespace ModuleManager.Pages.Modules
                 return Page();
             }
 
-            // Fetch Module from DB to get OwnerID.
-            var module = await Context
-                .Module.AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ModuleId == id);
+            // Fetch Review from DB to get OwnerID.
+            var review = await Context
+                .Review.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ReviewId == id);
 
-            if (module == null)
+            if (review == null)
             {
                 return NotFound();
             }
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                     User, module,
+                                                     User, review,
                                                      ModuleOperations.Update);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
 
-            Module.OwnerID = module.OwnerID;
-            Module.TimeStamp = DateTime.UtcNow;
-            Context.Attach(Module).State = EntityState.Modified;
+            Review.OwnerID = review.OwnerID;
+            Review.TimeStamp = DateTime.UtcNow;
+            Context.Attach(Review).State = EntityState.Modified;
 
-            if (Module.Status == ModuleStatus.Approved)
+            if (Review.Status == ReviewStatus.Approved)
             {
-                // If the module is updated after approval, 
+                // If the review is updated after approval, 
                 // and the user cannot approve,
                 // set the status back to submitted so the update can be
                 // checked and approved.
                 var canApprove = await AuthorizationService.AuthorizeAsync(User,
-                                        Module,
+                                        Review,
                                         ModuleOperations.Approve);
 
                 if (!canApprove.Succeeded)
                 {
-                    Module.Status = ModuleStatus.Submitted;
+                    Review.Status = ReviewStatus.Submitted;
                 }
             }
 

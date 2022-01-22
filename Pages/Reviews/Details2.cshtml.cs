@@ -3,15 +3,17 @@ using ModuleManager.Data;
 using ModuleManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Modules
+namespace ModuleManager.Pages.Reviews
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     #region snippet
-    public class IndexModel : DI_BasePageModel
+    [AllowAnonymous]
+    public class Details2Model : DI_BasePageModel
     {
-        public IndexModel(
+        public Details2Model(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
             UserManager<IdentityUser> userManager)
@@ -19,25 +21,36 @@ namespace ModuleManager.Pages.Modules
         {
         }
 
-        public IList<ModuleManager.Models.Module> Module { get; set; }
+        public ModuleManager.Models.Review Review { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            var modules = Context.Module.AsNoTracking().Join(Context.Templates, a => a.TemplateId, b => b.TemplateID, (a, b) => new Module { ModuleId=a.ModuleId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
+            ModuleManager.Models.Review? _module = await Context.Review.FirstOrDefaultAsync(m => m.ReviewId == id);
+
+            if (_module == null)
+            {
+                return NotFound();
+            }
+            Review = _module;
+
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Challenge();
+            }
+
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 
             var currentUserId = UserManager.GetUserId(User);
 
-            // Only approved modules are shown UNLESS you're authorized to see them
-            // or you are the owner.
-            if (!isAuthorized)
+            if (!isAuthorized
+                && currentUserId != Review.OwnerID
+                && Review.Status != ReviewStatus.Approved)
             {
-                modules = modules.Where(c => c.Status == ModuleStatus.Approved
-                                            || c.OwnerID == currentUserId);
+                return Forbid();
             }
 
-            Module = await modules.ToListAsync();
+            return Page();
         }
     }
     #endregion

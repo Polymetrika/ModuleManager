@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace ModuleManager.Pages.Modules
+namespace ModuleManager.Pages.Reviews
 {
     public class CreateModel : DI_BasePageModel
     {
@@ -19,7 +19,7 @@ namespace ModuleManager.Pages.Modules
             UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
-            Templates = context.Templates.AsNoTracking().Where(a => a.TemplateType == TemplateType.Module).Select(a =>
+            Templates = context.Templates.AsNoTracking().Where(a => a.TemplateType == TemplateType.Review).Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.TemplateID.ToString(),
@@ -34,7 +34,7 @@ namespace ModuleManager.Pages.Modules
         }
 
         [BindProperty]
-        public ModuleManager.Models.Module Module { get; set; }
+        public ModuleManager.Models.Review Review { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -43,18 +43,18 @@ namespace ModuleManager.Pages.Modules
                 return Page();
             }
 
-            Module.OwnerID = UserManager.GetUserId(User);
+            Review.OwnerID = UserManager.GetUserId(User);
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                        User, Module,
+                                                        User, Review,
                                                         ModuleOperations.Create);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
 
-            Module.TimeStamp = DateTime.UtcNow;
-            Context.Module.Add(Module);
+            Review.TimeStamp = DateTime.UtcNow;
+            Context.Review.Add(Review);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

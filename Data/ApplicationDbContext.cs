@@ -13,5 +13,6 @@ public class ApplicationDbContext : IdentityDbContext
     {
     }
     public DbSet<Module> Module { get; set; }
+    public DbSet<Review> Review { get; set; }
     public DbSet<Template> Templates { get; set; }
 }
