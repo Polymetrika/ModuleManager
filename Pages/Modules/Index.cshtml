@@ -1,0 +1,69 @@
+@page
+@model ModuleManager.Pages.Modules.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Module Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Module[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Module[0].TimeStamp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Module[0].Template)
+            </th>
+             <th>
+                @Html.DisplayNameFor(model => model.Module[0].Status)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Module) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TimeStamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Template)
+            </td>
+                           <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @if ((await AuthorizationService.AuthorizeAsync(
+                     User, item,
+                     ModuleOperations.Update)).Succeeded)
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.ModuleId">Edit</a>
+                        <text> | </text>
+                    }
+
+                    <a asp-page="./Details" asp-route-id="@item.ModuleId">Details</a>
+
+                    @if ((await AuthorizationService.AuthorizeAsync(
+                     User, item,
+                     ModuleOperations.Delete)).Succeeded)
+                    {
+                        <text> | </text>
+                        <a asp-page="./Delete" asp-route-id="@item.ModuleId">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
