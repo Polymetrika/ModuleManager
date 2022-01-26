@@ -34,12 +34,12 @@ namespace ModuleManager.Data
         private static async Task<string> EnsureUser(IServiceProvider serviceProvider,
                                                     string testUserPw, string UserName)
         {
-            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
+            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
 
             var user = await userManager.FindByNameAsync(UserName);
             if (user == null)
             {
-                user = new ApplicationUser
+                user = new IdentityUser
                 {
                     UserName = UserName,
                     EmailConfirmed = true
@@ -68,10 +68,11 @@ namespace ModuleManager.Data
             IdentityResult IR;
             if (!await roleManager.RoleExistsAsync(role))
             {
-                IR = await roleManager.CreateAsync(new IdentityRole(role));
+                var newRole = new IdentityRole(role);
+                IR = await roleManager.CreateAsync(newRole);
             }
 
-            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
+            var userManager = serviceProvider.GetService<UserManager<IdentityUser>>();
 
             //if (userManager == null)
             //{

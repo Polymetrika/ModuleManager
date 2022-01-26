@@ -14,7 +14,7 @@ namespace ModuleManager.Pages.Modules
         public IndexModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task OnGetAsync()
         {
-            var modules = Context.Module.AsNoTracking().Join(Context.Templates, a => a.TemplateId, b => b.TemplateID, (a, b) => new Module { ModuleId=a.ModuleId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
+            var modules = Context.Module.AsNoTracking();
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 

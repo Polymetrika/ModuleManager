@@ -15,7 +15,7 @@ namespace ModuleManager.Pages.LearningContents
         public DeleteModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }

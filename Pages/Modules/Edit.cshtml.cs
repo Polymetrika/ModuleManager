@@ -16,7 +16,7 @@ namespace ModuleManager.Pages.Modules
         public EditModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
@@ -36,7 +36,6 @@ namespace ModuleManager.Pages.Modules
             }
 
             Module = module;
-            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == Module.TemplateId)).Details;
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
                                                       User, Module,
                                                       ModuleOperations.Update);

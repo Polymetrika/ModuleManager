@@ -19,6 +19,13 @@
                 <span asp-validation-for="Template.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Template.LearningContentType" class="control-label">Content Type</label>
+                <select asp-for="Template.LearningContentType" asp-items="Html.GetEnumSelectList<LearningContentType>()">
+                    <option selected="selected" value="">Please select</option>
+                </select>
+                <span asp-validation-for="Template.Details" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Template.Details" class="control-label"></label>
                 <input asp-for="Template.Details" class="form-control" />
                 <span asp-validation-for="Template.Details" class="text-danger"></span>

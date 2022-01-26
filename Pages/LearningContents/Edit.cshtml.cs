@@ -16,7 +16,7 @@ namespace ModuleManager.Pages.LearningContents
         public EditModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
@@ -36,7 +36,7 @@ namespace ModuleManager.Pages.LearningContents
             }
 
             LearningContent = learningContent;
-            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateID == LearningContent.TemplateId)).Details;
+            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateId == LearningContent.TemplateId)).Details;
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
                                                       User, LearningContent,
                                                       ModuleOperations.Update);

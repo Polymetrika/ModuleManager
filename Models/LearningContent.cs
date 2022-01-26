@@ -14,9 +14,13 @@ namespace ModuleManager.Models
         public string? Details { get; set; }
         public string? TemplateId { get; set; }
         public DateTime TimeStamp { get; set; }
+        /// <summary>
+        /// inherited from template to simplify lookup
+        /// </summary>
         public LearningContentType Type { get; set; }
 
         public LearningContentStatus Status { get; set; }
+        public int ModuleId { get; set; }
         
     }
     public enum LearningContentType

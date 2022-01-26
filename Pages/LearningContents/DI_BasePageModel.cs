@@ -10,12 +10,12 @@ namespace ModuleManager.Pages.LearningContents
     {
         protected ApplicationDbContext Context { get; }
         protected IAuthorizationService AuthorizationService { get; }
-        protected UserManager<ApplicationUser> UserManager { get; }
+        protected UserManager<IdentityUser> UserManager { get; }
 
         public DI_BasePageModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager) : base()
+            UserManager<IdentityUser> userManager) : base()
         {
             Context = context;
             UserManager = userManager;

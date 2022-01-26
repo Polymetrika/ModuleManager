@@ -32,7 +32,7 @@ namespace ModuleManager.Pages.Templates
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-            Template.TemplateID=Guid.NewGuid().ToString("N");
+            Template.TemplateId=Guid.NewGuid().ToString("N");
             ModelState.ClearValidationState(nameof(Template));
             if (!TryValidateModel(Template, nameof(Template)))
             {

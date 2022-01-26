@@ -16,13 +16,13 @@ namespace ModuleManager.Pages.Modules
         public CreateModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
             Templates = context.Templates.AsNoTracking().Where(a => a.LearningContentType == LearningContentType.Module).Select(a =>
                                   new SelectListItem
                                   {
-                                      Value = a.TemplateID.ToString(),
+                                      Value = a.TemplateId.ToString(),
                                       Text = a.Name
                                   }).ToList();
         }

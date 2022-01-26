@@ -13,9 +13,10 @@ namespace ModuleManager.Models
         public string? Name { get; set; }
         public string? Details { get; set; }
         public string? TemplateId { get; set; }
-        public DateTime TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }     = DateTime.UtcNow;
 
         public ModuleStatus Status { get; set; }
+        public virtual ICollection<LearningContent> LearningContent { get; set; } = new List<LearningContent>();
         
     }
 

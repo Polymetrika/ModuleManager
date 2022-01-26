@@ -31,7 +31,7 @@ namespace ModuleManager.Pages.Templates
                 return NotFound();
             }
 
-            Template = await _context.Templates.FirstOrDefaultAsync(m => m.TemplateID == id);
+            Template = await _context.Templates.FirstOrDefaultAsync(m => m.TemplateId == id);
 
             if (Template == null)
             {
@@ -57,7 +57,7 @@ namespace ModuleManager.Pages.Templates
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TemplateExists(Template.TemplateID))
+                if (!TemplateExists(Template.TemplateId))
                 {
                     return NotFound();
                 }
@@ -72,7 +72,7 @@ namespace ModuleManager.Pages.Templates
 
         private bool TemplateExists(string id)
         {
-            return _context.Templates.Any(e => e.TemplateID == id);
+            return _context.Templates.Any(e => e.TemplateId == id);
         }
     }
 }

@@ -19,7 +19,18 @@
                 <span asp-validation-for="LearningContent.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="LearningContent.TemplateId" class="control-label"></label>
+                <label asp-for="LearningContent.ModuleId" class="control-label">Referenced Module</label>
+                @Html.DropDownListFor(m => m.LearningContent.ModuleId, Model.Modules,"Select a Module",
+                    new {
+                      @class = "form-control selectpicker",
+                      data_width = "auto",
+                      data_live_search = "true",
+                    //data_show_subtext = "true",
+                })
+                <span asp-validation-for="LearningContent.ModuleId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LearningContent.TemplateId" class="control-label">Source Template</label>
                 @Html.DropDownListFor(m => m.LearningContent.TemplateId, Model.Templates,"Select a Template",
                     new {
                       @class = "form-control selectpicker",

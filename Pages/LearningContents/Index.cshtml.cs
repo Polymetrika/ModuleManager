@@ -14,7 +14,7 @@ namespace ModuleManager.Pages.LearningContents
         public IndexModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }
@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.LearningContents
 
         public async Task OnGetAsync()
         {
-            var learningContents = Context.LearningContent.AsNoTracking().Join(Context.Templates, a => a.TemplateId, b => b.TemplateID, (a, b) => new LearningContent { LearningContentId=a.LearningContentId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
+            var learningContents = Context.LearningContent.AsNoTracking().Join(Context.Templates, a => a.TemplateId, b => b.TemplateId, (a, b) => new LearningContent { LearningContentId=a.LearningContentId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 

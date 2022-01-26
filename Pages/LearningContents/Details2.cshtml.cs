@@ -16,7 +16,7 @@ namespace ModuleManager.Pages.LearningContents
         public Details2Model(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
         }

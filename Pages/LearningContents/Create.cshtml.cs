@@ -16,17 +16,24 @@ namespace ModuleManager.Pages.LearningContents
         public CreateModel(
             ApplicationDbContext context,
             IAuthorizationService authorizationService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
             Templates = context.Templates.AsNoTracking().Select(a =>
                                   new SelectListItem
                                   {
-                                      Value = a.TemplateID.ToString(),
+                                      Value = a.TemplateId.ToString(),
+                                      Text = a.Name
+                                  }).ToList();
+            Modules = context.Module.AsNoTracking().Select(a =>
+                                  new SelectListItem
+                                  {
+                                      Value = a.ModuleId.ToString(),
                                       Text = a.Name
                                   }).ToList();
         }
         public List<SelectListItem> Templates { get; set; }
+        public List<SelectListItem> Modules { get; set; }
         public IActionResult OnGet()
         {
             Templates = Templates;
@@ -53,6 +60,7 @@ namespace ModuleManager.Pages.LearningContents
                 return Forbid();
             }
 
+            LearningContent.Type = (await Context.Templates.FirstOrDefaultAsync(a => a.TemplateId == LearningContent.TemplateId)).LearningContentType;
             LearningContent.TimeStamp = DateTime.UtcNow;
             Context.LearningContent.Add(LearningContent);
             await Context.SaveChangesAsync();
