@@ -33,6 +33,7 @@ namespace ModuleManager.Pages.Templates
         public async Task<IActionResult> OnPostAsync()
         {
             Template.TemplateId=Guid.NewGuid().ToString("N");
+            Template.Details = "{}";
             ModelState.ClearValidationState(nameof(Template));
             if (!TryValidateModel(Template, nameof(Template)))
             {

@@ -19,6 +19,28 @@
                 <span asp-validation-for="Module.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Module.TemplateId" class="control-label">Source Template</label>
+                @Html.DropDownListFor(m => m.Module.TemplateId, Model.Templates,"Select a Module Template",
+                    new {
+                      @class = "form-control selectpicker",
+                      data_width = "auto",
+                      data_live_search = "true",
+                    //data_show_subtext = "true",
+                })
+                <span asp-validation-for="Module.ProcessId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Module.ProcessId" class="control-label">Workflow Process Template</label>
+                @Html.DropDownListFor(m => m.Module.ProcessId, Model.Processes,"Select a Process Template",
+                    new {
+                      @class = "form-control selectpicker",
+                      data_width = "auto",
+                      data_live_search = "true",
+                    //data_show_subtext = "true",
+                })
+                <span asp-validation-for="Module.ProcessId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>

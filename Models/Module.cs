@@ -12,19 +12,16 @@ namespace ModuleManager.Models
 
         public string? Name { get; set; }
         public string? Details { get; set; }
+
+        public string? BusinessDetails { get; set; }
         public string? TemplateId { get; set; }
+        public int? ProcessId { get; set; }
         public DateTime TimeStamp { get; set; }     = DateTime.UtcNow;
 
-        public ModuleStatus Status { get; set; }
-        public virtual ICollection<LearningContent> LearningContent { get; set; } = new List<LearningContent>();
+        public Status Status { get; set; }
+        public virtual ICollection<Component> Components { get; set; } = new List<Component>();
         
     }
 
-    public enum ModuleStatus
-    {
-        Submitted,
-        Approved,
-        Rejected
-    }
     #endregion
 }

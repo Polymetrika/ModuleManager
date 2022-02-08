@@ -28,9 +28,7 @@ namespace ModuleManager.Pages.Templates
             {
                 return NotFound();
             }
-
             Template = await _context.Templates.FirstOrDefaultAsync(m => m.TemplateId == id);
-
             if (Template == null)
             {
                 return NotFound();

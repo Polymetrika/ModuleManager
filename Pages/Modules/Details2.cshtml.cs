@@ -45,7 +45,7 @@ namespace ModuleManager.Pages.Modules
 
             if (!isAuthorized
                 && currentUserId != Module.OwnerID
-                && Module.Status != ModuleStatus.Approved)
+                && Module.Status != Status.Approved)
             {
                 return Forbid();
             }

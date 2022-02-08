@@ -1,0 +1,66 @@
+@page
+@model ModuleManager.Pages.Components.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
+
+<h1>Edit</h1>
+
+<h4>Component</h4>
+<hr />
+<div class="row">
+    <div class="flex-container">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Component.ComponentId" />
+            <div class="form-group">
+                <label asp-for="Component.Name" class="control-label"></label>
+                <input asp-for="Component.Name" class="form-control" />
+                <span asp-validation-for="Component.Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Component.Details" class="control-label"></label>
+                <div id='formio'></div>
+                <input asp-for="Component.Details" class="hidden" />
+                <span asp-validation-for="Component.Details" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script src='https://unpkg.com/formiojs@4.14.0/dist/formio.full.min.js'></script>
+    @*<script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>*@
+    <script type='text/javascript'>
+      window.onload = function() {
+        Formio.createForm(document.getElementById('formio'), @Html.Raw(Model.Template)).then((form) => {
+          let modeldata=JSON.parse('@Html.Raw(Model.Component.Details)'||'{}');
+          form.submission = {
+            data:  modeldata
+          };
+          // Register for the submit event to get the completed submission.
+          form.on('submit', function(submission) {
+              $("#Module_Details").val(JSON.stringify(submission));
+          });
+  
+          // Everytime the form changes, this will fire.
+          form.on('change', function(changed) {
+              $("#Module_Details").val(JSON.stringify(submission));
+          });
+        });
+      }
+    </script>
+}

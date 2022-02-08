@@ -101,36 +101,15 @@ namespace ModuleManager.Data
 
             context.Module.AddRange(
             #region snippet_Module
-                new Module
-                {
-                    Name = "Module1",
-                    Details = "{template-specific content data}",
-                    Status = ModuleStatus.Approved,
-                    OwnerID = adminID
-                },
+                //new Module
+                //{
+                //    Name = "Module1",
+                //    Details = "{template-specific content data}",
+                //    Status = Status.Approved,
+                //    OwnerID = adminID
+                //}
             #endregion
             #endregion
-                new Module
-                {
-                    Name = "Module2",
-                    Details = "{template-specific content data}",
-                    Status = ModuleStatus.Submitted,
-                    OwnerID = adminID
-                },
-             new Module
-             {
-                 Name = "Module3",
-                 Details = "{template-specific content data}",
-                 Status = ModuleStatus.Rejected,
-                 OwnerID = adminID
-             },
-             new Module
-             {
-                 Name = "Module4",
-                 Details = "{template-specific content data}",
-                 Status = ModuleStatus.Submitted,
-                 OwnerID = adminID
-             }
              );
             context.SaveChanges();
         }

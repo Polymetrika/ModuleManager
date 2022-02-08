@@ -1,0 +1,101 @@
+﻿@page
+@model ModuleManager.Pages.Processes.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<style>
+    #builder button[type='submit']{
+        pointer-events:none;
+    }
+</style>
+
+<link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
+
+<h1>Edit</h1>
+
+<h4>Business Process</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Process.TemplateId" />
+            <div class="form-group">
+                <label asp-for="Process.Name" class="control-label"></label>
+                <input asp-for="Process.Name" class="form-control" />
+                <span asp-validation-for="Process.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Process.RequiredModuleTemplates" class="control-label">Required Templates for the Process workflow</label>
+            <input type="hidden" asp-for="Process.RequiredModuleTemplates" />
+                <span asp-validation-for="Process.RequiredModuleTemplates" class="text-danger"></span>
+                <ul class="sortablesource">
+                    @foreach(var t in Model.Templates){
+	                <li class="ui-state-default" data-value=@t.Value><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>@t.Text</li>
+                    }
+                </ul>
+                <ul class="sortablesource">
+                    @foreach(var t in Model.RequiredModuleTemplates){
+	                <li class="ui-state-default" data-value=@t.Value><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>@t.Text</li>
+                    }
+                </ul>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="Process.Details" />
+                <span asp-validation-for="Process.Details" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+    
+            <div id="builder"></div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>
+    <script type='text/javascript'>
+        function updateDetails(data){
+            $("#Template_Details").val(JSON.stringify(data))
+        }
+
+      window.onload = function() {
+        let dbdata=@Html.Raw(Model.Process.Details) ||{};
+        let builder=Formio.builder(document.getElementById('builder'), dbdata, {noDefaultSubmitButton:true})
+          .then((builder)=>{
+            $("").prop("disabled",true);            
+            builder.on('saveComponent', function(e) {
+                updateDetails(builder.schema);
+            });       
+            builder.on('addComponent', function(e) {
+                updateDetails(builder.schema);
+            });       
+            builder.on('removeComponent', function(e) {
+                updateDetails(builder.schema);
+            });    
+            builder.on('updateComponent', function(e) {
+                updateDetails(builder.schema);
+            });
+          });
+          //jQueryUI sortable
+		$( ".sortablesource, .sortabletarget" ).sortable({
+          connectWith: ".connectedSortable",
+          update:(event,ui)=>{
+              let val=[];
+              $(".sortabletarget li").each((i,el)={
+                  val.push(el.dataset["value"])
+              });
+              $("Process_RequiredModuleTemplates").val(JSON.stringify(val));
+          }
+        }).disableSelection();
+      };
+    </script>
+}

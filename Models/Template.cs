@@ -5,7 +5,9 @@
         public string TemplateId { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }
-        public LearningContentType LearningContentType { get; set; }
+        public ContentType ContentType { get; set; }
+        public ReleaseStatus ReleaseStatus { get; set; }
     }
+
 
 }

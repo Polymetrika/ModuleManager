@@ -16,3 +16,37 @@ html {
 body {
   margin-bottom: 60px;
 }
+main {
+    margin-top: 60px;
+}
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #fff;
+    z-index: 1001;
+    margin-bottom: 0;
+    height: 60px;
+}
+/*jqueryUI*/
+
+.ui-draggable, .ui-droppable {
+    background-position: top;
+}
+.sortablesource, .sortabletarget {
+    border: 1px solid #eee;
+    width: 142px;
+    min-height: 20px;
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0 0 0;
+    float: left;
+    margin-right: 10px;
+}
+
+.sortablesource li, .sortabletarget li {
+    margin: 0 5px 5px 5px;
+    padding: 5px;
+    font-size: 1.2em;
+    width: 120px;
+}

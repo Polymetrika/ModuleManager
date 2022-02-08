@@ -10,14 +10,11 @@
     }
 </style>
 
-<link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
 
-<h1>Edit</h1>
-
-<h4>Template</h4>
+<h4>Edit Template</h4>
 <hr />
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-9">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Template.TemplateId" />
@@ -36,7 +33,11 @@
         </form>
     </div>
     
+</div>
+<div class="row">    
+    <div class="col-md-12">
             <div id="builder"></div>
+    </div>
 </div>
 
 <div>
@@ -44,9 +45,15 @@
 </div>
 
 @section Scripts {
+    
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
-    <script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>
+    
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css'>
+<link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
+<script src='https://cdn.form.io/formiojs/formio.full.min.js'></script>
+
     <script type='text/javascript'>
         function updateDetails(data){
             $("#Template_Details").val(JSON.stringify(data))
@@ -54,19 +61,26 @@
 
       window.onload = function() {
         let dbdata=@Html.Raw(Model.Template.Details) ||{};
-        let builder=Formio.builder(document.getElementById('builder'), dbdata, {noDefaultSubmitButton:true})
+        let builder=Formio.builder(document.getElementById('builder'), dbdata, {
+            builder:{
+            }
+        })
           .then((builder)=>{
-            $("").prop("disabled",true);            
-            builder.on('saveComponent', function() {
+            $("submit").prop("disabled",true);  
+            //$('.formcomponents').removeClass("col-md-2");
+            //$('.formarea').removeClass("col-md-10");
+            //$('.formcomponents').addClass("col-md-3");
+            //$('.formarea').addClass("col-md-9");
+            builder.on('saveComponent', function(e) {
                 updateDetails(builder.schema);
             });       
-            builder.on('addComponent', function() {
+            builder.on('addComponent', function(e) {
                 updateDetails(builder.schema);
             });       
-            builder.on('removeComponent', function() {
+            builder.on('removeComponent', function(e) {
                 updateDetails(builder.schema);
             });    
-            builder.on('updateComponent', function() {
+            builder.on('updateComponent', function(e) {
                 updateDetails(builder.schema);
             });
           });

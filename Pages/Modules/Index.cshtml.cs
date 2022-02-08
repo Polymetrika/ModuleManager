@@ -33,7 +33,7 @@ namespace ModuleManager.Pages.Modules
             // or you are the owner.
             if (!isAuthorized)
             {
-                modules = modules.Where(c => c.Status == ModuleStatus.Approved
+                modules = modules.Where(c => c.Status == Status.Approved
                                             || c.OwnerID == currentUserId);
             }
 

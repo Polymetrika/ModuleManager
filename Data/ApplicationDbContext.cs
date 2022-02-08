@@ -20,6 +20,7 @@ public class ApplicationDbContext
     }
 
     public DbSet<Module> Module { get; set; }
-    public DbSet<LearningContent> LearningContent { get; set; }
+    public DbSet<Component> Components { get; set; }
+    public DbSet<Process> Processes { get; set; }
     public DbSet<Template> Templates { get; set; }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ModuleManager.Pages.Modules
 {
@@ -23,8 +24,8 @@ namespace ModuleManager.Pages.Modules
 
         [BindProperty]
         public ModuleManager.Models.Module Module { get; set; }
-        [BindProperty]
         public string Template { get; set; }
+        public string ProcessTemplate { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -43,6 +44,10 @@ namespace ModuleManager.Pages.Modules
             {
                 return Forbid();
             }
+            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateId == Module.TemplateId)).Details;
+            var process = (await Context.Processes.FirstOrDefaultAsync(m => m.ProcessId == Module.ProcessId));
+            ProcessTemplate = process.Details;
+            //parse required templates IDs from process definition, lookup templates in the DB and provide the list to the UI.
 
             return Page();
         }
@@ -76,7 +81,7 @@ namespace ModuleManager.Pages.Modules
             Module.TimeStamp = DateTime.UtcNow;
             Context.Attach(Module).State = EntityState.Modified;
 
-            if (Module.Status == ModuleStatus.Approved)
+            if (Module.Status == Status.Approved)
             {
                 // If the module is updated after approval, 
                 // and the user cannot approve,
@@ -88,7 +93,7 @@ namespace ModuleManager.Pages.Modules
 
                 if (!canApprove.Succeeded)
                 {
-                    Module.Status = ModuleStatus.Submitted;
+                    Module.Status = Status.Submitted;
                 }
             }
 

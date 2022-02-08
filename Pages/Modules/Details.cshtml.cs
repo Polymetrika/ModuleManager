@@ -39,7 +39,7 @@ namespace ModuleManager.Pages.Modules
 
             if (!isAuthorized
                 && currentUserId != Module.OwnerID
-                && Module.Status != ModuleStatus.Approved)
+                && Module.Status != Status.Approved)
             {
                 return Forbid();
             }
@@ -47,7 +47,7 @@ namespace ModuleManager.Pages.Modules
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id, ModuleStatus status)
+        public async Task<IActionResult> OnPostAsync(int id, Status status)
         {
             var module = await Context.Module.FirstOrDefaultAsync(
                                                       m => m.ModuleId == id);
@@ -57,7 +57,7 @@ namespace ModuleManager.Pages.Modules
                 return NotFound();
             }
 
-            var moduleOperation = (status == ModuleStatus.Approved)
+            var moduleOperation = (status == Status.Approved)
                                                        ? ModuleOperations.Approve
                                                        : ModuleOperations.Reject;
 

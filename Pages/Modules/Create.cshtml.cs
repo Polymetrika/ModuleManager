@@ -19,17 +19,25 @@ namespace ModuleManager.Pages.Modules
             UserManager<IdentityUser> userManager)
             : base(context, authorizationService, userManager)
         {
-            Templates = context.Templates.AsNoTracking().Where(a => a.LearningContentType == LearningContentType.Module).Select(a =>
+            Templates = context.Templates.AsNoTracking().Where(a => a.ContentType == ContentType.Module && a.ReleaseStatus == ReleaseStatus.Active).Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.TemplateId.ToString(),
                                       Text = a.Name
                                   }).ToList();
+            Processes = context.Processes.AsNoTracking().Where(a => a.ReleaseStatus == ReleaseStatus.Active).Select(a =>
+                                  new SelectListItem
+                                  {
+                                      Value = a.ProcessId.ToString(),
+                                      Text = a.Name
+                                  }).ToList();
         }
         public List<SelectListItem> Templates { get; set; }
+        public List<SelectListItem> Processes { get; set; }
         public IActionResult OnGet()
         {
             Templates = Templates;
+            Processes = Processes;
             return Page();
         }
 

@@ -224,13 +224,16 @@ namespace ModuleManager.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ModuleManager.Models.LearningContent", b =>
+            modelBuilder.Entity("ModuleManager.Models.Component", b =>
                 {
-                    b.Property<int>("LearningContentId")
+                    b.Property<int>("ComponentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LearningContentId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ComponentId"), 1L, 1);
+
+                    b.Property<int>("ContentType")
+                        .HasColumnType("int");
 
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
@@ -253,14 +256,11 @@ namespace ModuleManager.Migrations
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("LearningContentId");
+                    b.HasKey("ComponentId");
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("LearningContent");
+                    b.ToTable("Components");
                 });
 
             modelBuilder.Entity("ModuleManager.Models.Module", b =>
@@ -271,6 +271,9 @@ namespace ModuleManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModuleId"), 1L, 1);
 
+                    b.Property<string>("BusinessDetails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
 
@@ -280,8 +283,14 @@ namespace ModuleManager.Migrations
                     b.Property<string>("OwnerID")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProcessId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("TemplateId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
@@ -291,21 +300,58 @@ namespace ModuleManager.Migrations
                     b.ToTable("Module");
                 });
 
+            modelBuilder.Entity("ModuleManager.Models.Process", b =>
+                {
+                    b.Property<int>("ProcessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProcessId"), 1L, 1);
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReleaseStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RequiredModuleTemplates")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ProcessId");
+
+                    b.ToTable("Processes");
+                });
+
             modelBuilder.Entity("ModuleManager.Models.Template", b =>
                 {
                     b.Property<string>("TemplateId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("ContentType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Details")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LearningContentType")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReleaseStatus")
+                        .HasColumnType("int");
 
                     b.HasKey("TemplateId");
 
@@ -363,10 +409,10 @@ namespace ModuleManager.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ModuleManager.Models.LearningContent", b =>
+            modelBuilder.Entity("ModuleManager.Models.Component", b =>
                 {
                     b.HasOne("ModuleManager.Models.Module", null)
-                        .WithMany("LearningContent")
+                        .WithMany("Components")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -374,7 +420,7 @@ namespace ModuleManager.Migrations
 
             modelBuilder.Entity("ModuleManager.Models.Module", b =>
                 {
-                    b.Navigation("LearningContent");
+                    b.Navigation("Components");
                 });
 #pragma warning restore 612, 618
         }

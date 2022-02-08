@@ -1,0 +1,57 @@
+﻿@page
+@model ModuleManager.Pages.Processes.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Process</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Process.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Process.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Process.Details)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Process.Details)
+        </dd>
+    </dl>
+</div>
+
+@if (Model.Process.ReleaseStatus != ReleaseStatus.Active)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Process, ModuleOperations.Approve)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@Model.Process.TemplateId" />
+            <input type="hidden" name="status" value="@ReleaseStatus.Active" />
+            <button type="submit" class="btn btn-xs btn-success">Approve</button>
+        </form>
+    }
+}
+
+@if (Model.Process.ReleaseStatus != ReleaseStatus.Inactive)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(
+     User, Model.Process, ModuleOperations.Reject)).Succeeded)
+    {
+        <form style="display:inline;" method="post">
+            <input type="hidden" name="id" value="@Model.Process.ProcessId" />
+            <input type="hidden" name="status" value="@ReleaseStatus.Inactive" />
+            <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+        </form>
+    }
+}
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Process.ProcessId">Edit</a> |
+    <a asp-page="./Index">Back to List</a>
+</div>
