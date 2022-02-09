@@ -40,7 +40,7 @@ namespace ModuleManager.Pages.Processes
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-            Process.TemplateId=Guid.NewGuid().ToString("N");
+            Process.ProcessId=Guid.NewGuid().ToString("N");
             ModelState.ClearValidationState(nameof(Process));
             if (!TryValidateModel(Process, nameof(Process)))
             {

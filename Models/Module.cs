@@ -11,11 +11,17 @@ namespace ModuleManager.Models
         public string? OwnerID { get; set; }
 
         public string? Name { get; set; }
+        /// <summary>
+        /// Edited with the module template
+        /// </summary>
         public string? Details { get; set; }
+        /// <summary>
+        /// edited with the Process template
+        /// </summary>
 
         public string? BusinessDetails { get; set; }
         public string? TemplateId { get; set; }
-        public int? ProcessId { get; set; }
+        public string? ProcessId { get; set; }
         public DateTime TimeStamp { get; set; }     = DateTime.UtcNow;
 
         public Status Status { get; set; }

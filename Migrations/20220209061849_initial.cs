@@ -49,7 +49,7 @@ namespace ModuleManager.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Module",
+                name: "Modules",
                 columns: table => new
                 {
                     ModuleId = table.Column<int>(type: "int", nullable: false)
@@ -59,28 +59,26 @@ namespace ModuleManager.Migrations
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BusinessDetails = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TemplateId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProcessId = table.Column<int>(type: "int", nullable: true),
+                    ProcessId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Module", x => x.ModuleId);
+                    table.PrimaryKey("PK_Modules", x => x.ModuleId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Processes",
                 columns: table => new
                 {
-                    ProcessId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProcessId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     OwnerID = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TemplateId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RequiredModuleTemplates = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    ReleaseStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,7 +92,8 @@ namespace ModuleManager.Migrations
                     TemplateId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ContentType = table.Column<int>(type: "int", nullable: false)
+                    ContentType = table.Column<int>(type: "int", nullable: false),
+                    ReleaseStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -226,9 +225,9 @@ namespace ModuleManager.Migrations
                 {
                     table.PrimaryKey("PK_Components", x => x.ComponentId);
                     table.ForeignKey(
-                        name: "FK_Components_Module_ModuleId",
+                        name: "FK_Components_Modules_ModuleId",
                         column: x => x.ModuleId,
-                        principalTable: "Module",
+                        principalTable: "Modules",
                         principalColumn: "ModuleId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -311,7 +310,7 @@ namespace ModuleManager.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Module");
+                name: "Modules");
         }
     }
 }

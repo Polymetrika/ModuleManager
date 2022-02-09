@@ -20,7 +20,7 @@ namespace ModuleManager.Pages.Processes
         public EditModel(ModuleManager.Data.ApplicationDbContext context)
         {
             _context = context;
-            Templates = context.Templates.AsNoTracking().Where(a => a.ContentType == ContentType.Module).Select(a =>
+            Templates = context.Templates.AsNoTracking().Where(a => a.ReleaseStatus==ReleaseStatus.Active).Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.TemplateId.ToString(),
@@ -40,8 +40,8 @@ namespace ModuleManager.Pages.Processes
                 return NotFound();
             }
 
-            Process = await _context.Processes.FirstOrDefaultAsync(m => m.TemplateId == id);
-            var selectedTemplateIds = JsonSerializer.Deserialize<ICollection<int>>(Process.RequiredModuleTemplates).Select(a=>a.ToString());
+            Process = await _context.Processes.FirstOrDefaultAsync(m => m.ProcessId == id);
+            var selectedTemplateIds = JsonSerializer.Deserialize<ICollection<string>>(Process.RequiredModuleTemplates??"[]").Select(a=>a.ToString());
             RequiredModuleTemplates = new List<SelectListItem>();
             foreach (var template in Templates.Where(a => selectedTemplateIds.Contains(a.Value)))
             {
@@ -72,7 +72,7 @@ namespace ModuleManager.Pages.Processes
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TemplateExists(Process.TemplateId))
+                if (!ProcessExists(Process.ProcessId))
                 {
                     return NotFound();
                 }
@@ -85,9 +85,9 @@ namespace ModuleManager.Pages.Processes
             return RedirectToPage("./Index");
         }
 
-        private bool TemplateExists(string id)
+        private bool ProcessExists(string id)
         {
-            return _context.Processes.Any(e => e.TemplateId == id);
+            return _context.Processes.Any(e => e.ProcessId == id);
         }
     }
 }

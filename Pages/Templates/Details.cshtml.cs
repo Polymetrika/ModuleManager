@@ -35,5 +35,35 @@ namespace ModuleManager.Pages.Templates
             }
             return Page();
         }
+        public async Task<IActionResult> OnPostAsync(string id,int releasestatus)
+        {
+            Template = await _context.Templates.FirstOrDefaultAsync(m => m.TemplateId == id);
+
+            if (Template == null)
+            {
+                return NotFound();
+            }
+            Template.ReleaseStatus=(ReleaseStatus)releasestatus;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TemplateExists(Template.TemplateId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToPage("./Index");
+        }
+        private bool TemplateExists(string id)
+        {
+            return _context.Templates.Any(e => e.TemplateId == id);
+        }
     }
 }

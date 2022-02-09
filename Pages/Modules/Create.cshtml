@@ -5,7 +5,7 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+
 
 <h4>Module</h4>
 <hr />
@@ -30,7 +30,7 @@
                 <span asp-validation-for="Module.ProcessId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Module.ProcessId" class="control-label">Workflow Process Template</label>
+                <label asp-for="Module.ProcessId" class="control-label">Design Process Template</label>
                 @Html.DropDownListFor(m => m.Module.ProcessId, Model.Processes,"Select a Process Template",
                     new {
                       @class = "form-control selectpicker",

@@ -25,7 +25,7 @@ namespace ModuleManager.Pages.Components
                                       Value = a.TemplateId.ToString(),
                                       Text = a.Name
                                   }).ToList();
-            Modules = context.Module.AsNoTracking().Where(a => a.Status == Status.Draft).Select(a =>
+            Modules = context.Modules.AsNoTracking().Where(a => a.Status == Status.Draft).Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.ModuleId.ToString(),

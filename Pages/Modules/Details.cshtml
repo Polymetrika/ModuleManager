@@ -5,7 +5,7 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+
 
 <div>
     <h4>Module</h4>
@@ -31,11 +31,20 @@
         <dd>
             @Html.DisplayFor(model => model.Module.Status)
         </dd>
+        <dt>
+            Process
+        </dt>
+        <dd><a class="nav-link text-dark" asp-area="" asp-route-moduleid=mode.Module.ProcessID asp-page="/Processes/Details/">Management</a>
+        </dd>
+        <dt>
+            Components
+        </dt>
+        <dd><a class="nav-link text-dark" asp-area="" asp-route-moduleid=mode.Module.ModuleID asp-page="/Components/Index/">Module Components</a>
+        </dd>
     </dl>
 </div>
 
         
-            <button type="submit" class="btn btn-xs btn-primary">LearningContent</button>
 @if (Model.Module.Status != Status.Approved)
 {
     @if ((await AuthorizationService.AuthorizeAsync(

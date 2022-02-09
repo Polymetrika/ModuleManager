@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task OnGetAsync()
         {
-            var modules = Context.Module.AsNoTracking();
+            var modules = Context.Modules.AsNoTracking();
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 

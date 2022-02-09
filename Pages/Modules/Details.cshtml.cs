@@ -24,7 +24,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? _module = await Context.Module.FirstOrDefaultAsync(m => m.ModuleId == id);
+            ModuleManager.Models.Module? _module = await Context.Modules.FirstOrDefaultAsync(m => m.ModuleId == id);
 
             if (_module == null)
             {
@@ -49,7 +49,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnPostAsync(int id, Status status)
         {
-            var module = await Context.Module.FirstOrDefaultAsync(
+            var module = await Context.Modules.FirstOrDefaultAsync(
                                                       m => m.ModuleId == id);
 
             if (module == null)
@@ -68,7 +68,7 @@ namespace ModuleManager.Pages.Modules
                 return Forbid();
             }
             module.Status = status;
-            Context.Module.Update(Module);
+            Context.Modules.Update(Module);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

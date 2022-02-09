@@ -33,20 +33,49 @@ main {
 .ui-draggable, .ui-droppable {
     background-position: top;
 }
+.sortablescroller{
+    max-height:200px;
+    width:100%
+}
 .sortablesource, .sortabletarget {
     border: 1px solid #eee;
-    width: 142px;
+    width: 350px;
     min-height: 20px;
     list-style-type: none;
     margin: 0;
     padding: 5px 0 0 0;
     float: left;
     margin-right: 10px;
+    max-height: 100%;
+    background-color:#e6f1fb
+
+}
+.sortabletarget {
+    background-color: #00ffff;
+    opacity:.8;
 }
 
-.sortablesource li, .sortabletarget li {
-    margin: 0 5px 5px 5px;
-    padding: 5px;
-    font-size: 1.2em;
-    width: 120px;
+    .sortablesource li, .sortabletarget li {
+        margin: 0 2px 2px 2px;
+        padding: 2px;
+        font-size: 0.9em;
+        width: 90%;
+    }
+
+/* formio*/
+
+#formsample {
+    border: 1px solid #8ab1fb;
+    background-color: #e6f1fb;
+    pointer-events: none;
+    opacity: 0.9;
+    padding: 15px;
+    margin-top:10px;
+}
+
+/*bootstrap override*/
+
+.form-group input[type="text"]{
+    max-width:400px;
+    margin-left:2em;
 }

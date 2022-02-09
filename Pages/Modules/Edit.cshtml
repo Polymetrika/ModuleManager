@@ -7,7 +7,7 @@
 
 <link rel='stylesheet' href='https://cdn.form.io/formiojs/formio.full.min.css'>
 
-<h1>Edit</h1>
+
 
 <h4>Module</h4>
 <hr />
@@ -24,7 +24,7 @@
                 <input asp-for="Module.Name" class="form-control" />
                 <span asp-validation-for="Module.Name" class="text-danger"></span>
             </div>
-            
+            <div class="accordion">
             <p class="h3">Module Details</p>
             <div class="form-group">
                 <label asp-for="Module.Details" class="control-label"></label>
@@ -39,7 +39,7 @@
                 <input asp-for="Module.BusinessDetails" class="hidden" />
                 <span asp-validation-for="Module.BusinessDetails" class="text-danger"></span>
             </div>
-
+            </div>
 
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

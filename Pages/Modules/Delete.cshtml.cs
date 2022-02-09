@@ -25,7 +25,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? _module = await Context.Module.FirstOrDefaultAsync(
+            ModuleManager.Models.Module? _module = await Context.Modules.FirstOrDefaultAsync(
                                                  m => m.ModuleId == id);
 
             if (_module == null)
@@ -48,7 +48,7 @@ namespace ModuleManager.Pages.Modules
         public async Task<IActionResult> OnPostAsync(int id)
         {
             var module = await Context
-                .Module.AsNoTracking()
+                .Modules.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ModuleId == id);
 
             if (module == null)
@@ -64,7 +64,7 @@ namespace ModuleManager.Pages.Modules
                 return Forbid();
             }
 
-            Context.Module.Remove(module);
+            Context.Modules.Remove(module);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

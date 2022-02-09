@@ -62,7 +62,7 @@ namespace ModuleManager.Pages.Modules
             }
 
             Module.TimeStamp = DateTime.UtcNow;
-            Context.Module.Add(Module);
+            Context.Modules.Add(Module);
             await Context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

@@ -29,7 +29,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? module = await Context.Module.FirstOrDefaultAsync(
+            ModuleManager.Models.Module? module = await Context.Modules.FirstOrDefaultAsync(
                                                              m => m.ModuleId == id);
             if (module == null)
             {
@@ -48,7 +48,6 @@ namespace ModuleManager.Pages.Modules
             var process = (await Context.Processes.FirstOrDefaultAsync(m => m.ProcessId == Module.ProcessId));
             ProcessTemplate = process.Details;
             //parse required templates IDs from process definition, lookup templates in the DB and provide the list to the UI.
-
             return Page();
         }
 
@@ -61,7 +60,7 @@ namespace ModuleManager.Pages.Modules
 
             // Fetch Module from DB to get OwnerID.
             var module = await Context
-                .Module.AsNoTracking()
+                .Modules.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ModuleId == id);
 
             if (module == null)

@@ -12,16 +12,15 @@
     public enum ContentType
     {
         Module = 1,
-        BusinessProcess = 2,
-        ReviewChecklist = 3,
-        Experience = 4,
-        MediaAsset = 5,
-        LearningMaterial = 6
+        ReviewChecklist = 2,
+        MediaAsset = 3,
+        Content = 4,
+        StoryBoard=5
     }
 
     public enum ReleaseStatus
     {
-        Inactive = 1,
-        Active=2
+        Inactive = 0,
+        Active=1
     }
 }

@@ -32,7 +32,7 @@ namespace ModuleManager.Pages.Processes
                 return NotFound();
             }
 
-            Process = await _context.Processes.FirstOrDefaultAsync(m => m.TemplateId == id);
+            Process = await _context.Processes.FirstOrDefaultAsync(m => m.ProcessId == id);
 
             if (Process == null)
             {
@@ -40,5 +40,36 @@ namespace ModuleManager.Pages.Processes
             }
             return Page();
         }
+        public async Task<IActionResult> OnPostAsync(string id, int releasestatus)
+        {
+            Process = await _context.Processes.FirstOrDefaultAsync(m => m.ProcessId == id);
+
+            if (Process == null)
+            {
+                return NotFound();
+            }
+            Process.ReleaseStatus = (ReleaseStatus)releasestatus;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProcessExists(Process.ProcessId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToPage("./Index");
+        }
+        private bool ProcessExists(string id)
+        {
+            return _context.Processes.Any(e => e.ProcessId == id);
+        }
     }
 }
+

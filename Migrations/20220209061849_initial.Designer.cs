@@ -12,7 +12,7 @@ using ModuleManager.Data;
 namespace ModuleManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220128044905_initial")]
+    [Migration("20220209061849_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -285,8 +285,8 @@ namespace ModuleManager.Migrations
                     b.Property<string>("OwnerID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProcessId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProcessId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -299,16 +299,13 @@ namespace ModuleManager.Migrations
 
                     b.HasKey("ModuleId");
 
-                    b.ToTable("Module");
+                    b.ToTable("Modules");
                 });
 
             modelBuilder.Entity("ModuleManager.Models.Process", b =>
                 {
-                    b.Property<int>("ProcessId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProcessId"), 1L, 1);
+                    b.Property<string>("ProcessId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
@@ -319,13 +316,10 @@ namespace ModuleManager.Migrations
                     b.Property<string>("OwnerID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RequiredModuleTemplates")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
+                    b.Property<int>("ReleaseStatus")
                         .HasColumnType("int");
 
-                    b.Property<string>("TemplateId")
+                    b.Property<string>("RequiredModuleTemplates")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimeStamp")
@@ -351,6 +345,9 @@ namespace ModuleManager.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReleaseStatus")
+                        .HasColumnType("int");
 
                     b.HasKey("TemplateId");
 

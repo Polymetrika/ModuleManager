@@ -25,7 +25,7 @@ namespace ModuleManager.Pages.Assessments
                                       Value = a.TemplateId.ToString(),
                                       Text = a.Name
                                   }).ToList();
-            Modules = context.Module.AsNoTracking().Select(a =>
+            Modules = context.Modules.AsNoTracking().Select(a =>
                                   new SelectListItem
                                   {
                                       Value = a.ModuleId.ToString(),

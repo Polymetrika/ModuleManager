@@ -16,6 +16,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.BusinessProcess[0].Name)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BusinessProcess[0].ReleaseStatus)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -26,9 +29,12 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.TemplateId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.TemplateId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.TemplateId">Delete</a>
+                @Html.DisplayFor(modelItem => item.ReleaseStatus)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.ProcessId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.ProcessId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.ProcessId">Delete</a>
             </td>
         </tr>
 }

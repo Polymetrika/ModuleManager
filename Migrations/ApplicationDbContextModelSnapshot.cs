@@ -283,8 +283,8 @@ namespace ModuleManager.Migrations
                     b.Property<string>("OwnerID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProcessId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProcessId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -297,16 +297,13 @@ namespace ModuleManager.Migrations
 
                     b.HasKey("ModuleId");
 
-                    b.ToTable("Module");
+                    b.ToTable("Modules");
                 });
 
             modelBuilder.Entity("ModuleManager.Models.Process", b =>
                 {
-                    b.Property<int>("ProcessId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProcessId"), 1L, 1);
+                    b.Property<string>("ProcessId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
@@ -321,9 +318,6 @@ namespace ModuleManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RequiredModuleTemplates")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TemplateId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimeStamp")

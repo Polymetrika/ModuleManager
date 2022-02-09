@@ -94,12 +94,12 @@ namespace ModuleManager.Data
         #region snippet1
         public static void SeedDB(ApplicationDbContext context, string adminID)
         {
-            if (context.Module.Any())
+            if (context.Modules.Any())
             {
                 return;   // DB has been seeded
             }
 
-            context.Module.AddRange(
+            context.Modules.AddRange(
             #region snippet_Module
                 //new Module
                 //{

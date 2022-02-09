@@ -25,7 +25,7 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            ModuleManager.Models.Module? _module = await Context.Module.FirstOrDefaultAsync(m => m.ModuleId == id);
+            ModuleManager.Models.Module? _module = await Context.Modules.FirstOrDefaultAsync(m => m.ModuleId == id);
 
             if (_module == null)
             {

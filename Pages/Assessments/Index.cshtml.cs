@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Assessments
 
         public async Task OnGetAsync()
         {
-            var Components = Context.Components.AsNoTracking().Where(a=>a.ContentType==ContentType.Assessment).Join(Context.Templates, a => a.TemplateId, b => b.TemplateId, (a, b) => new Component { ComponentId=a.ComponentId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
+            var Components = Context.Components.AsNoTracking().Where(a=>a.ContentType==ContentType.StoryBoard).Join(Context.Templates, a => a.TemplateId, b => b.TemplateId, (a, b) => new Component { ComponentId=a.ComponentId,Name=a.Name,TemplateId=b.Name,Status=a.Status,TimeStamp=a.TimeStamp});
             var isAuthorized = User.IsInRole(Constants.ModuleManagersRole) ||
                                User.IsInRole(Constants.ModuleAdministratorsRole);
 

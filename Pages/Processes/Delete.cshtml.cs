@@ -30,7 +30,7 @@ namespace ModuleManager.Pages.Processes
                 return NotFound();
             }
 
-            BusinessProcess = await _context.Processes.FirstOrDefaultAsync(m => m.TemplateId == id);
+            BusinessProcess = await _context.Processes.FirstOrDefaultAsync(m => m.ProcessId == id);
 
             if (BusinessProcess == null)
             {

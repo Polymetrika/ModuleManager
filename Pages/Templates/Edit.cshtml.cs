@@ -66,7 +66,6 @@ namespace ModuleManager.Pages.Templates
                     throw;
                 }
             }
-
             return RedirectToPage("./Index");
         }
 
