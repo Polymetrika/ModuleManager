@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Modules
 
         public ModuleManager.Models.Module Module { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             ModuleManager.Models.Module? _module = await Context.Modules.FirstOrDefaultAsync(m => m.ModuleId == id);
 

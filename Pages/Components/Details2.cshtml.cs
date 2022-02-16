@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Components
 
         public ModuleManager.Models.Component Component { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             ModuleManager.Models.Component? _module = await Context.Components.FirstOrDefaultAsync(m => m.ComponentId == id);
 

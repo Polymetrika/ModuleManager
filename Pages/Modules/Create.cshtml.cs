@@ -46,12 +46,14 @@ namespace ModuleManager.Pages.Modules
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            Module.ModuleId = Guid.NewGuid().ToString("N");
+            ModelState.ClearValidationState(nameof(Module));
+            Module.OwnerID = UserManager.GetUserId(User);
+            if (!TryValidateModel(Module, nameof(Module)))
             {
+                
                 return Page();
             }
-
-            Module.OwnerID = UserManager.GetUserId(User);
 
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
                                                         User, Module,

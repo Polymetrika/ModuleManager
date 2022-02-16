@@ -23,7 +23,7 @@ namespace ModuleManager.Pages.Components
         [BindProperty]
         public ModuleManager.Models.Component Component { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             ModuleManager.Models.Component? _module = await Context.Components.FirstOrDefaultAsync(
                                                  m => m.ComponentId == id);
@@ -45,7 +45,7 @@ namespace ModuleManager.Pages.Components
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             var Component = await Context
                 .Components.AsNoTracking()

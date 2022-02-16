@@ -24,8 +24,8 @@
             
             <div class="form-group">
                 <label asp-for="Component.Details" class="control-label"></label>
-                <div id='formio'></div>
-                <input asp-for="Component.Details" class="hidden" />
+                <div id="hidden"='formio'></div>
+                <input type= asp-for="Component.Details" class="hidden" />
                 <span asp-validation-for="Component.Details" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -47,7 +47,7 @@
     <script type='text/javascript'>
       window.onload = function() {
         Formio.createForm(document.getElementById('formio'), @Html.Raw(Model.Template)).then((form) => {
-          let modeldata=JSON.parse('@Html.Raw(Model.Component.Details)'||'{}');
+          let modeldata=JSON.parse('@Html.Raw(Model.Component.Details??"")'||'{}');
           form.submission = {
             data:  modeldata
           };

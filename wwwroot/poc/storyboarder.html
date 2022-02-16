@@ -1,21 +1,66 @@
 ﻿<!DOCTYPE HTML>
 <html>
 <head>
-    <link rel="stylesheet" href="storyboarder.css" />
+    <link rel="stylesheet" href="../css/storyboarder.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
-<body>
+<body onresize="if(typeof pageResizer!=='undefined') pageResizer()">
 
-    <div id="toolbox">
+    <div id="toolbox" style="position:absolute;right:80px">
         <input type="file" id="hidden-file-upload">
-        <input id="upload-input" type="image" title="upload board" src="upload-icon.png" alt="upload board"> 
-        <input type="image" id="download-input" title="download board" src="download-icon.png" alt="download board"> 
-        <input type="image" id="delete-board" title="delete board" src="trash-icon.png" alt="delete board">
+        <span id="currentmode"></span>
+        <button onclick="changemode('view')" class="btn btn-lg btn-light"><i class="fa-solid fa-magnifying-glass-location"></i></button>
+        <button onclick="changemode('state')" class="btn btn-lg btn-light"><i class="fa-solid fa-pen-to-square"></i></button>
     </div>
+    <div id="stateeditor"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.5.0/d3.min.js"></script>
+    <!--
+    Copyright (c) 2022 Fernando Cartwright
 
-    <script src="https://d3js.org/d3.v6.js" charset="utf-8"></script>
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    -->
+    <!--
+    Copyright (c) 2013 Ross Kirsling
+
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    -->
     <!--<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>-->
-    <script src="js/storyboarder.js"></script>
+    <script src="../js/storyboarder.js"></script>
 </body>
 
 </html>

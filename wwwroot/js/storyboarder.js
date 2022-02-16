@@ -1,599 +1,496 @@
-﻿document.onload = (function(d3, saveAs, Blob, undefined){
-  "use strict";
+﻿// set up SVG for D3
+var width = 600;
+var height = 580;
+var mode = "view";
+window.onresize = pageSizer;
+function pageSizer() {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    width = w - 80;
+    height = h - 160;
+    let exists = typeof svg !== "undefined";
+    let hasattr = svg.attr;
+    if (exists && hasattr ) {
+        svg
+            .attr('width', width)
+            .attr('height', height);
+    }
+}
+const colors = d3.scaleOrdinal(["#fff4d9"]);//#fff4d9
+const linkGeneratorH = d3.linkHorizontal();
+const linkGeneratorV = d3.linkVertical();
+const linkGeneratorR = d3.linkRadial();
 
-  // define storyboard object
-  var StoryBoarder = function(svg, nodes, edges){
-    var thisBoard = this;
-        thisBoard.idct = 0;
-    
-    thisBoard.nodes = nodes || [];
-    thisBoard.edges = edges || [];
-    
-    thisBoard.state = {
-      selectedNode: null,
-      selectedEdge: null,
-      mouseDownNode: null,
-      mouseDownLink: null,
-      justDragged: false,
-      justScaleTransBoard: false,
-      lastKeyDown: -1,
-      shiftNodeDrag: false,
-      selectedText: null
-    };
+const rectWidth = 40;
+const rectHeight = 40;
 
-    // define arrow markers for board links
-    var defs = svg.append('svg:defs');
-    defs.append('svg:marker')
-      .attr('id', 'end-arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', "32")
-      .attr('markerWidth', 3.5)
-      .attr('markerHeight', 3.5)
-      .attr('orient', 'auto')
-      .append('svg:path')
-      .attr('d', 'M0,-5L10,0L0,5');
+const svg = d3.select("body")
+    .append("svg");
+pageSizer();
+const bg = svg.append("g")
+    .classed("bg", true);
 
-    // define arrow markers for leading arrow
-    defs.append('svg:marker')
-      .attr('id', 'mark-end-arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 7)
-      .attr('markerWidth', 3.5)
-      .attr('markerHeight', 3.5)
-      .attr('orient', 'auto')
-      .append('svg:path')
-      .attr('d', 'M0,-5L10,0L0,5');
+bg.append('rect')
+    .attr("width","100%")
+    .attr("height","100%")
+    .attr("style","fill:#e5e5e5");
 
-    thisBoard.svg = svg;
-    thisBoard.svgG = svg.append("g")
-          .classed(thisBoard.consts.boardClass, true);
-    var svgG = thisBoard.svgG;
+const zoomed = bg
+    .append("g")
+    .classed('zoomed', true)
+const canvas = zoomed.append("g")
+    .classed("canvas", true);
+var zoom;
 
-    // displayed when dragging between nodes
-    thisBoard.dragLine = svgG.append('svg:path')
-          .attr('class', 'link dragline hidden')
-          .attr('d', 'M0,0L0,0')
-          .style('marker-end', 'url(#mark-end-arrow)');
+function changemode(newmode) {
+    mode = newmode;
+    document.getElementById("currentmode").innerHTML = mode;
+    if (mode == "view") {
+        zoom = d3
+            // base d3 pan & zoom behavior
+            .zoom()
+            .filter((event => { return mode == "view";}))
+            // limit zoom to between 20% and 200% of original size
+            .scaleExtent([0.2, 2])
+            // apply pan & zoom transform to 'zoomed' element
+            .on('zoom', ({ transform }) => {
+                bg
+                    .selectAll('.zoomable')
+                    .attr('transform', transform);
+            })
+            // add 'grabbing' class to 'bg' element when panning;
+            // add 'scaling' class to 'bg' element when zooming
+            .on('start', (event) => { 
+                if (event.sourceEvent && event.sourceEvent.type) {
+                    bg.classed(event.sourceEvent.type === 'wheel' ? 'scaling' : 'grabbing', true);
+                }
+            })
+            // remove 'grabbing' and 'scaling' classes when done panning & zooming
+            .on('end', () => bg.classed('grabbing scaling', false));
 
-    // svg nodes and edges 
-    thisBoard.paths = svgG.append("g").selectAll("g");
-    thisBoard.circles = svgG.append("g").selectAll("g");
+        bg
+            .call(zoom)
+        d3.selectAll(".zoomed")
+            .classed("zoomable", true);
+    } else {
+        if (zoom && zoom.on) {
+            zoom.on("zoom", null);
+        }
+        d3.selectAll(".zoomed")
+            .classed("zoomable", false);
+    }
+}
 
-    thisBoard.drag = d3.behavior.drag()
-          .origin(function(d){
-            return {x: d.x, y: d.y};
-          })
-          .on("drag", function(args){
-            thisBoard.state.justDragged = true;
-            thisBoard.dragmove.call(thisBoard, args);
-          })
-          .on("dragend", function() {
-            // todo check if edge-mode is selected
-          });
+// set up initial nodes and links
+//  - nodes are known by 'id', not by index in array.
+//  - reflexive edges are indicated on the node (as a bold black rect).
+//  - links are always source < target; edge directions are set by 'left' and 'right'.
+const nodes = [
+    //{ id: 0, reflexive: false },
+    //{ id: 1, reflexive: true },
+    //{ id: 2, reflexive: false }
+];
+let lastNodeId =0;
+const links = [
+    //{ source: nodes[0], target: nodes[1], left: false, right: true, control:[0,0] },
+    //{ source: nodes[1], target: nodes[2], left: false, right: true, control:[0,0] }
+];
 
-    // listen for key events
-    d3.select(window).on("keydown", function(){
-      thisBoard.svgKeyDown.call(thisBoard);
+// init D3 force layout
+const force = d3.forceSimulation()
+    .force('collision', d3.forceCollide().radius(function (d) {
+        return d.radius
+      }))
+    .on('tick', tick);
+
+// init D3 drag support
+const drag = d3.drag(event)
+    // Mac Firefox doesn't distinguish between left/right click when Ctrl is held... 
+    .filter(() => event.button === 0 || event.button === 2)
+    .on('start', (event, d) => {
+        if (!event.active) force.alphaTarget(0.3).restart();
+
+        d.fx = d.x;
+        d.fy = d.y;
     })
-    .on("keyup", function(){
-      thisBoard.svgKeyUp.call(thisBoard);
-    });
-    svg.on("mousedown", function(d){thisBoard.svgMouseDown.call(thisBoard, d);});
-    svg.on("mouseup", function(d){thisBoard.svgMouseUp.call(thisBoard, d);});
+    .on('drag', (event, d) => {
+        d.fx = event.x;
+        d.fy = event.y;
+    })
+    .on('end', (event, d) => {
+        if (!event.active) force.alphaTarget(0);
 
-    // listen for dragging
-    var dragSvg = d3.behavior.zoom()
-          .on("zoom", function(){
-            if (d3.event.sourceEvent.shiftKey){
-              // TODO  the internal d3 state is still changing
-              return false;
-            } else{
-              thisBoard.zoomed.call(thisBoard);
-            }
-            return true;
-          })
-          .on("zoomstart", function(){
-            var ael = d3.select("#" + thisBoard.consts.activeEditId).node();
-            if (ael){
-              ael.blur();
-            }
-            if (!d3.event.sourceEvent.shiftKey) d3.select('body').style("cursor", "move");
-          })
-          .on("zoomend", function(){
-            d3.select('body').style("cursor", "auto");
-          });
-    
-    svg.call(dragSvg).on("dblclick.zoom", null);
-
-    // listen for resize
-    window.onresize = function(){thisBoard.updateWindow(svg);};
-
-    // handle download data
-    d3.select("#download-input").on("click", function(){
-      var saveEdges = [];
-      thisBoard.edges.forEach(function(val, i){
-        saveEdges.push({source: val.source.id, target: val.target.id});
-      });
-      var blob = new Blob([window.JSON.stringify({"nodes": thisBoard.nodes, "edges": saveEdges})], {type: "text/plain;charset=utf-8"});
-      saveAs(blob, "mydag.json");
+        d.fx = null;
+        d.fy = null;
     });
 
+// define arrow markers for graph links
+canvas.append('defs').append('marker')
+    .attr('id', 'end-arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 6)
+    .attr('markerWidth', 3)
+    .attr('markerHeight', 3)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', '#000');
 
-    // handle uploaded data
-    d3.select("#upload-input").on("click", function(){
-      document.getElementById("hidden-file-upload").click();
-    });
-    d3.select("#hidden-file-upload").on("change", function(){
-      if (window.File && window.FileReader && window.FileList && window.Blob) {
-        var uploadFile = this.files[0];
-        var filereader = new window.FileReader();
-        
-        filereader.onload = function(){
-          var txtRes = filereader.result;
-          // TODO better error handling
-          try{
-            var jsonObj = JSON.parse(txtRes);
-            thisBoard.deleteBoard(true);
-            thisBoard.nodes = jsonObj.nodes;
-            thisBoard.setIdCt(jsonObj.nodes.length + 1);
-            var newEdges = jsonObj.edges;
-            newEdges.forEach(function(e, i){
-              newEdges[i] = {source: thisBoard.nodes.filter(function(n){return n.id == e.source;})[0],
-                          target: thisBoard.nodes.filter(function(n){return n.id == e.target;})[0]};
-            });
-            thisBoard.edges = newEdges;
-            thisBoard.updateBoard();
-          }catch(err){
-            window.alert("Error parsing uploaded file\nerror message: " + err.message);
-            return;
-          }
-        };
-        filereader.readAsText(uploadFile);
-        
-      } else {
-        alert("Your browser won't let you save this board -- try upgrading your browser to IE 10+ or Chrome or Firefox.");
-      }
+canvas.append('defs').append('marker')
+    .attr('id', 'start-arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 4)
+    .attr('markerWidth', 3)
+    .attr('markerHeight', 3)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M10,-5L0,0L10,5')
+    .attr('fill', '#000');
 
-    });
+// line displayed when dragging new nodes
+const dragLine = canvas.append('path')
+    .attr('class', 'link dragline hidden')
+    .attr('d', 'M0,0L0,0');
 
-    // handle delete board
-    d3.select("#delete-board").on("click", function(){
-      thisBoard.deleteBoard(false);
-    });
-  };
-
-  StoryBoarder.prototype.setIdCt = function(idct){
-    this.idct = idct;
-  };
-
-  StoryBoarder.prototype.consts =  {
-    selectedClass: "selected",
-    connectClass: "connect-node",
-    circleGClass: "conceptG",
-    boardClass: "board",
-    activeEditId: "active-editing",
-    BACKSPACE_KEY: 8,
-    DELETE_KEY: 46,
-    ENTER_KEY: 13,
-    nodeRadius: 50
-  };
-
-  /* PROTOTYPE FUNCTIONS */
-
-  StoryBoarder.prototype.dragmove = function(d) {
-    var thisBoard = this;
-    if (thisBoard.state.shiftNodeDrag){
-      thisBoard.dragLine.attr('d', 'M' + d.x + ',' + d.y + 'L' + d3.mouse(thisBoard.svgG.node())[0] + ',' + d3.mouse(this.svgG.node())[1]);
-    } else{
-      d.x += d3.event.dx;
-      d.y +=  d3.event.dy;
-      thisBoard.updateBoard();
-    }
-  };
-
-  StoryBoarder.prototype.deleteBoard = function(skipPrompt){
-    var thisBoard = this,
-        doDelete = true;
-    if (!skipPrompt){
-      doDelete = window.confirm("Press OK to delete this board");
-    }
-    if(doDelete){
-      thisBoard.nodes = [];
-      thisBoard.edges = [];
-      thisBoard.updateBoard();
-    }
-  };
-
-  /* select all text in element: taken from http://stackoverflow.com/questions/6139107/programatically-select-text-in-a-contenteditable-html-element */
-  StoryBoarder.prototype.selectElementContents = function(el) {
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  };
+// handles to link and node element groups
+let path = canvas.append('g').selectAll('path');
+let rect = canvas.append('g').selectAll('g');
 
 
-  /* insert svg line breaks: taken from http://stackoverflow.com/questions/13241475/how-do-i-include-newlines-in-labels-in-d3-charts */
-  StoryBoarder.prototype.insertTitleLinebreaks = function (gEl, title) {
-    var words = title.split(/\s+/g),
-        nwords = words.length;
-    var el = gEl.append("text")
-          .attr("text-anchor","middle")
-          .attr("dy", "-" + (nwords-1)*7.5);
+canvas
+    .on('contextmenu', (event) => { event.preventDefault(); })
+    .attr('width', width)
+    .attr('height', height);
 
-    for (var i = 0; i < words.length; i++) {
-      var tspan = el.append('tspan').text(words[i]);
-      if (i > 0)
-        tspan.attr('x', 0).attr('dy', '15');
-    }
-  };
+// mouse event vars
+let selectedNode = null;
+let selectedLink = null;
+let mousedownLink = null;
+let mousedownNode = null;
+let mouseupNode = null;
 
-  
-  // remove edges associated with a node
-  StoryBoarder.prototype.spliceLinksForNode = function(node) {
-    var thisBoard = this,
-        toSplice = thisBoard.edges.filter(function(l) {
-      return (l.source === node || l.target === node);
-    });
-    toSplice.map(function(l) {
-      thisBoard.edges.splice(thisBoard.edges.indexOf(l), 1);
-    });
-  };
+function resetMouseVars() {
+    mousedownNode = null;
+    mouseupNode = null;
+    mousedownLink = null;
+}
 
-  StoryBoarder.prototype.replaceSelectEdge = function(d3Path, edgeData){
-    var thisBoard = this;
-    d3Path.classed(thisBoard.consts.selectedClass, true);
-    if (thisBoard.state.selectedEdge){
-      thisBoard.removeSelectFromEdge();
-    }
-    thisBoard.state.selectedEdge = edgeData;
-  };
+// update force layout (called automatically each iteration)
+function tick() {
+    // draw directed edges with proper padding from node centers
+    path.attr('d', (d) => {
+        const deltaX = d.target.x - d.source.x;
+        const deltaY = d.target.y - d.source.y;
+        const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const normX = deltaX / dist;
+        const normY = deltaY / dist;
+        const sourcePadding = d.left ? 30 : 20;
+        const targetPadding = d.right ? 30 : 20;
+        const sourceX = d.source.x + (sourcePadding * normX);
+        const sourceY = d.source.y + (sourcePadding * normY);
+        const targetX = d.target.x - (targetPadding * normX);
+        const targetY = d.target.y - (targetPadding * normY);
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            return linkGeneratorH({ source: [sourceX, sourceY], target: [targetX, targetY] });
 
-  StoryBoarder.prototype.replaceSelectNode = function(d3Node, nodeData){
-    var thisBoard = this;
-    d3Node.classed(this.consts.selectedClass, true);
-    if (thisBoard.state.selectedNode){
-      thisBoard.removeSelectFromNode();
-    }
-    thisBoard.state.selectedNode = nodeData;
-  };
-  
-  StoryBoarder.prototype.removeSelectFromNode = function(){
-    var thisBoard = this;
-    thisBoard.circles.filter(function(cd){
-      return cd.id === thisBoard.state.selectedNode.id;
-    }).classed(thisBoard.consts.selectedClass, false);
-    thisBoard.state.selectedNode = null;
-  };
+        } else {
+            return linkGeneratorV({ source: [sourceX, sourceY], target: [targetX, targetY] });
 
-  StoryBoarder.prototype.removeSelectFromEdge = function(){
-    var thisBoard = this;
-    thisBoard.paths.filter(function(cd){
-      return cd === thisBoard.state.selectedEdge;
-    }).classed(thisBoard.consts.selectedClass, false);
-    thisBoard.state.selectedEdge = null;
-  };
-
-  StoryBoarder.prototype.pathMouseDown = function(d3path, d){
-    var thisBoard = this,
-        state = thisBoard.state;
-    d3.event.stopPropagation();
-    state.mouseDownLink = d;
-
-    if (state.selectedNode){
-      thisBoard.removeSelectFromNode();
-    }
-    
-    var prevEdge = state.selectedEdge;  
-    if (!prevEdge || prevEdge !== d){
-      thisBoard.replaceSelectEdge(d3path, d);
-    } else{
-      thisBoard.removeSelectFromEdge();
-    }
-  };
-
-  // mousedown on node
-  StoryBoarder.prototype.circleMouseDown = function(d3node, d){
-    var thisBoard = this,
-        state = thisBoard.state;
-    d3.event.stopPropagation();
-    state.mouseDownNode = d;
-    if (d3.event.shiftKey){
-      state.shiftNodeDrag = d3.event.shiftKey;
-      // reposition dragged directed edge
-      thisBoard.dragLine.classed('hidden', false)
-        .attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
-      return;
-    }
-  };
-
-  /* place editable text on node in place of svg text */
-  StoryBoarder.prototype.changeTextOfNode = function(d3node, d){
-    var thisBoard= this,
-        consts = thisBoard.consts,
-        htmlEl = d3node.node();
-    d3node.selectAll("text").remove();
-    var nodeBCR = htmlEl.getBoundingClientRect(),
-        curScale = nodeBCR.width/consts.nodeRadius,
-        placePad  =  5*curScale,
-        useHW = curScale > 1 ? nodeBCR.width*0.71 : consts.nodeRadius*1.42;
-    // replace with editableconent text
-    var d3txt = thisBoard.svg.selectAll("foreignObject")
-          .data([d])
-          .enter()
-          .append("foreignObject")
-          .attr("x", nodeBCR.left + placePad )
-          .attr("y", nodeBCR.top + placePad)
-          .attr("height", 2*useHW)
-          .attr("width", useHW)
-          .append("xhtml:p")
-          .attr("id", consts.activeEditId)
-          .attr("contentEditable", "true")
-          .text(d.title)
-          .on("mousedown", function(d){
-            d3.event.stopPropagation();
-          })
-          .on("keydown", function(d){
-            d3.event.stopPropagation();
-            if (d3.event.keyCode == consts.ENTER_KEY && !d3.event.shiftKey){
-              this.blur();
-            }
-          })
-          .on("blur", function(d){
-            d.title = this.textContent;
-            thisBoard.insertTitleLinebreaks(d3node, d.title);
-            d3.select(this.parentElement).remove();
-          });
-    return d3txt;
-  };
-
-  // mouseup on nodes
-  StoryBoarder.prototype.circleMouseUp = function(d3node, d){
-    var thisBoard = this,
-        state = thisBoard.state,
-        consts = thisBoard.consts;
-    // reset the states
-    state.shiftNodeDrag = false;    
-    d3node.classed(consts.connectClass, false);
-    
-    var mouseDownNode = state.mouseDownNode;
-    
-    if (!mouseDownNode) return;
-
-    thisBoard.dragLine.classed("hidden", true);
-
-    if (mouseDownNode !== d){
-      // we're in a different node: create new edge for mousedown edge and add to board
-      var newEdge = {source: mouseDownNode, target: d};
-      var filtRes = thisBoard.paths.filter(function(d){
-        if (d.source === newEdge.target && d.target === newEdge.source){
-          thisBoard.edges.splice(thisBoard.edges.indexOf(d), 1);
         }
-        return d.source === newEdge.source && d.target === newEdge.target;
-      });
-      if (!filtRes[0].length){
-        thisBoard.edges.push(newEdge);
-        thisBoard.updateBoard();
-      }
-    } else{
-      // we're in the same node
-      if (state.justDragged) {
-        // dragged, not clicked
-        state.justDragged = false;
-      } else{
-        // clicked, not dragged
-        if (d3.event.shiftKey){
-          // shift-clicked node: edit text content
-          var d3txt = thisBoard.changeTextOfNode(d3node, d);
-          var txtNode = d3txt.node();
-          thisBoard.selectElementContents(txtNode);
-          txtNode.focus();
-        } else{
-          if (state.selectedEdge){
-            thisBoard.removeSelectFromEdge();
-          }
-          var prevNode = state.selectedNode;            
-          
-          if (!prevNode || prevNode.id !== d.id){
-            thisBoard.replaceSelectNode(d3node, d);
-          } else{
-            thisBoard.removeSelectFromNode();
-          }
-        }
-      }
-    }
-    state.mouseDownNode = null;
-    return;
-    
-  }; // end of circles mouseup
-
-  // mousedown on main svg
-  StoryBoarder.prototype.svgMouseDown = function(){
-    this.state.boardMouseDown = true;
-  };
-
-  // mouseup on main svg
-  StoryBoarder.prototype.svgMouseUp = function(){
-    var thisBoard = this,
-        state = thisBoard.state;
-    if (state.justScaleTransBoard) {
-      // dragged not clicked
-      state.justScaleTransBoard = false;
-    } else if (state.boardMouseDown && d3.event.shiftKey){
-      // clicked not dragged from svg
-      var xycoords = d3.mouse(thisBoard.svgG.node()),
-          d = {id: thisBoard.idct++, title: "new concept", x: xycoords[0], y: xycoords[1]};
-      thisBoard.nodes.push(d);
-      thisBoard.updateBoard();
-      // make title of text immediently editable
-      var d3txt = thisBoard.changeTextOfNode(thisBoard.circles.filter(function(dval){
-        return dval.id === d.id;
-      }), d),
-          txtNode = d3txt.node();
-      thisBoard.selectElementContents(txtNode);
-      txtNode.focus();
-    } else if (state.shiftNodeDrag){
-      // dragged from node
-      state.shiftNodeDrag = false;
-      thisBoard.dragLine.classed("hidden", true);
-    }
-    state.boardMouseDown = false;
-  };
-
-  // keydown on main svg
-  StoryBoarder.prototype.svgKeyDown = function() {
-    var thisBoard = this,
-        state = thisBoard.state,
-        consts = thisBoard.consts;
-    // make sure repeated key presses don't register for each keydown
-    if(state.lastKeyDown !== -1) return;
-
-    state.lastKeyDown = d3.event.keyCode;
-    var selectedNode = state.selectedNode,
-        selectedEdge = state.selectedEdge;
-
-    switch(d3.event.keyCode) {
-    case consts.BACKSPACE_KEY:
-    case consts.DELETE_KEY:
-      d3.event.preventDefault();
-      if (selectedNode){
-        thisBoard.nodes.splice(thisBoard.nodes.indexOf(selectedNode), 1);
-        thisBoard.spliceLinksForNode(selectedNode);
-        state.selectedNode = null;
-        thisBoard.updateBoard();
-      } else if (selectedEdge){
-        thisBoard.edges.splice(thisBoard.edges.indexOf(selectedEdge), 1);
-        state.selectedEdge = null;
-        thisBoard.updateBoard();
-      }
-      break;
-    }
-  };
-
-  StoryBoarder.prototype.svgKeyUp = function() {
-    this.state.lastKeyDown = -1;
-  };
-
-  // call to propagate changes to board
-  StoryBoarder.prototype.updateBoard = function(){
-    
-    var thisBoard = this,
-        consts = thisBoard.consts,
-        state = thisBoard.state;
-    
-    thisBoard.paths = thisBoard.paths.data(thisBoard.edges, function(d){
-      return String(d.source.id) + "+" + String(d.target.id);
+        //return linkGeneratorR({ source: [sourceX, sourceY], target: [targetX, targetY] });
     });
-    var paths = thisBoard.paths;
-    // update existing paths
-    paths.style('marker-end', 'url(#end-arrow)')
-      .classed(consts.selectedClass, function(d){
-        return d === state.selectedEdge;
-      })
-      .attr("d", function(d){
-        return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
-      });
+    rect.attr('transform', (d) => `translate(${d.x-rectWidth/2},${d.y-rectHeight/2})`);
+}
 
-    // add new paths
-    paths.enter()
-      .append("path")
-      .style('marker-end','url(#end-arrow)')
-      .classed("link", true)
-      .attr("d", function(d){
-        return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
-      })
-      .on("mousedown", function(d){
-        thisBoard.pathMouseDown.call(thisBoard, d3.select(this), d);
-        }
-      )
-      .on("mouseup", function(d){
-        state.mouseDownLink = null;
-      });
+// update graph (called when needed)
+function restart() {
+    // path (link) group
+    path = path.data(links);
+
+    // update existing links
+    path.classed('selected', (d) => d === selectedLink)
+        .style('marker-start', (d) => d.left ? 'url(#start-arrow)' : '')
+        .style('marker-end', (d) => d.right ? 'url(#end-arrow)' : '');
 
     // remove old links
-    paths.exit().remove();
-    
-    // update existing nodes
-    thisBoard.circles = thisBoard.circles.data(thisBoard.nodes, function(d){ return d.id;});
-    thisBoard.circles.attr("transform", function(d){return "translate(" + d.x + "," + d.y + ")";});
+    path.exit().remove();
 
-    // add new nodes
-    var newGs= thisBoard.circles.enter()
-          .append("g");
+    // add new links
 
-    newGs.classed(consts.circleGClass, true)
-      .attr("transform", function(d){return "translate(" + d.x + "," + d.y + ")";})
-      .on("mouseover", function(d){        
-        if (state.shiftNodeDrag){
-          d3.select(this).classed(consts.connectClass, true);
-        }
-      })
-      .on("mouseout", function(d){
-        d3.select(this).classed(consts.connectClass, false);
-      })
-      .on("mousedown", function(d){
-        thisBoard.circleMouseDown.call(thisBoard, d3.select(this), d);
-      })
-      .on("mouseup", function(d){
-        thisBoard.circleMouseUp.call(thisBoard, d3.select(this), d);
-      })
-      .call(thisBoard.drag);
+    //d3.select("#multiLink")
+    //    .selectAll("path")
+    //    .data(multiLinkData)
+    //    .join("path")
+    //    .attr("d", linkGen)
+    //    .attr("fill", "none")
+    //    .attr("stroke", "black");
 
-    newGs.append("circle")
-      .attr("r", String(consts.nodeRadius));
+    path = path.enter().append('path')
+        .attr('class', 'link')
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .classed('selected', (d) => d === selectedLink)
+        .style('marker-start', (d) => d.left ? 'url(#start-arrow)' : '')
+        .style('marker-end', (d) => d.right ? 'url(#end-arrow)' : '')
+        .on('mousedown', (event, d) => {
+            if (mode != "state") return;
+            if (event.ctrlKey) return;
 
-    newGs.each(function(d){
-      thisBoard.insertTitleLinebreaks(d3.select(this), d.title);
-    });
+            // select link
+            mousedownLink = d;
+            selectedLink = (mousedownLink === selectedLink) ? null : mousedownLink;
+            selectedNode = null;
+            restart();
+        })
+        .merge(path);
+
+    // rect (node) group
+    // NB: the function arg is crucial here! nodes are known by id, not by index!
+    rect = rect.data(nodes, (d) => d.id);
+
+    // update existing nodes (reflexive & selected visual states)
+    rect.selectAll('rect')
+        .style('fill', (d) => (d === selectedNode) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id))
+        .classed('reflexive', (d) => d.reflexive);
 
     // remove old nodes
-    thisBoard.circles.exit().remove();
-  };
+    rect.exit().remove();
 
-  StoryBoarder.prototype.zoomed = function(){
-    this.state.justScaleTransBoard = true;
-    d3.select("." + this.consts.boardClass)
-      .attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")"); 
-  };
+    // add new nodes
+    const g = rect.enter().append('g');
 
-  StoryBoarder.prototype.updateWindow = function(svg){
-    var docEl = document.documentElement,
-        bodyEl = document.getElementsByTagName('body')[0];
-    var x = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth;
-    var y = window.innerHeight|| docEl.clientHeight|| bodyEl.clientHeight;
-    svg.attr("width", x).attr("height", y);
-  };
+    g.append('rect')
+        .attr('class', 'node')
+        .attr('width', rectWidth)
+        .attr('height', rectHeight)
+        .style('fill', (d) => (d === selectedNode) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id))
+        .style('stroke', (d) => d3.rgb(colors(d.id)).darker().toString())
+        .classed('reflexive', (d) => d.reflexive)
+        .on('mouseover', function (event, d) {
+            if (mode != "state") return;
+            if (!mousedownNode || d === mousedownNode) return;
+            // enlarge target node
+            d3.select(this).attr('transform', 'scale(1.1)');
+        })
+        .on('mouseout', function (event, d) {
+            if (mode != "state") return;
+            if (!mousedownNode || d === mousedownNode) return;
+            // unenlarge target node
+            d3.select(this).attr('transform', '');
+        })
+        .on('mousedown', (event, d) => {
+            if (mode != "state") return;
+            if (event.ctrlKey) return;
 
+            // select node
+            mousedownNode = d;
+            selectedNode = (mousedownNode === selectedNode) ? null : mousedownNode;
+            selectedLink = null;
 
-  
-  /**** MAIN ****/
+            // reposition drag line
+            dragLine
+                .style('marker-end', 'url(#end-arrow)')
+                .classed('hidden', false)
+                .attr('d', `M${mousedownNode.x},${mousedownNode.y}L${mousedownNode.x},${mousedownNode.y}`);
 
-  // warn the user when leaving
-  window.onbeforeunload = function(){
-    return "Make sure to save your board locally before leaving :-)";
-  };      
+            restart();
+        })
+        .on('mouseup', function (event, d) {
+            if (mode != "state") return;
+            if (!mousedownNode) return;
+            // needed by FF
+            dragLine
+                .classed('hidden', true)
+                .style('marker-end', '');
 
-  var docEl = document.documentElement,
-      bodyEl = document.getElementsByTagName('body')[0];
-  
-  var width = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth,
-      height =  window.innerHeight|| docEl.clientHeight|| bodyEl.clientHeight;
+            // check for drag-to-self
+            mouseupNode = d;
+            if (mouseupNode !== mousedownNode) {
+                // unenlarge target node
+                d3.select(this).attr('transform', '');
 
-  var xLoc = width/2 - 25,
-      yLoc = 100;
+                // add link to graph (update if exists)
+                // NB: links are strictly source < target; arrows separately specified by booleans
+                const isRight = mousedownNode.id < mouseupNode.id;
+                const source = isRight ? mousedownNode : mouseupNode;
+                const target = isRight ? mouseupNode : mousedownNode;
 
-  // initial node data
-  var nodes = [{title: "new concept", id: 0, x: xLoc, y: yLoc},
-               {title: "new concept", id: 1, x: xLoc, y: yLoc + 200}];
-  var edges = [{source: nodes[1], target: nodes[0]}];
+                const link = links.filter((l) => l.source === source && l.target === target)[0];
+                if (link) {
+                    link[isRight ? 'right' : 'left'] = true;
+                } else {
+                    links.push({ source, target, left: !isRight, right: isRight });
+                }
+                // select new link
+                selectedLink = link;
+                selectedNode = null;
+            }
+            resetMouseVars();
+            restart();
+        });
 
+    // show node IDs
+    g.append('text')
+        .attr('x', rectWidth/2)
+        .attr('y', rectHeight/2)
+        .attr('class', 'id')
+        .text((d) => d.id);
 
-  /** MAIN SVG **/
-  var svg = d3.select("body").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-  var board = new StoryBoarder(svg, nodes, edges);
-      board.setIdCt(2);
-  board.updateBoard();
-})(window.d3, window.saveAs, window.Blob);
+    rect = g.merge(rect);
+
+    // set the graph in motion
+    force
+        .nodes(nodes);
+        //.force('link')
+        //.links(links);
+
+    force.restart();
+}
+
+function transformConstants() {
+    let transform = d3.select('.zoomed').attr('transform');
+    let translate = [0, 0];
+    let scale = 1;
+    if (transform) {
+        transform = transform.split(" ");
+        translate = transform[0].split("(")[1].split(")")[0].split(",").map(a => parseFloat(a));
+        scale = transform[1].split("(")[1].split(")")[0];
+    }
+    return { translate: translate, scale: scale };
+}
+function mousedown(event) {
+    // because :active only works in WebKit?
+    canvas.classed('active', true);
+    if (mode !== "state") { return; }
+    else if (event.ctrlKey || mousedownNode || mousedownLink) return;
+
+    // insert new node at point
+    const point = d3.pointer(event);
+    //get transforms from bg
+    let transforms = transformConstants();
+    point[0] = point[0] / transforms.scale - transforms.translate[0] / transforms.scale;
+    point[1] = point[1] / transforms.scale - transforms.translate[1] / transforms.scale;
+    const node = { id: ++lastNodeId, reflexive: false, x: point[0], y: point[1] };
+    nodes.push(node);
+    restart();
+}
+function mousemove(event) {
+    if (mode !== "state") {
+        return;
+    }
+    else if (!mousedownNode) {
+        return;
+    }
+    const point = d3.pointer(event);
+    let transforms = transformConstants();
+    point[0] = point[0] / transforms.scale - transforms.translate[0] / transforms.scale;
+    point[1] = point[1] / transforms.scale - transforms.translate[1] / transforms.scale;
+    // update drag line
+    dragLine.attr('d', `M${mousedownNode.x},${mousedownNode.y}L${point[0]},${point[1]}`);
+}
+
+function mouseup(event) {
+    if (mode !== "state") { return; }
+    else if (mousedownNode) {
+        // hide drag line
+        dragLine
+            .classed('hidden', true)
+            .style('marker-end', '');
+    }
+
+    // because :active only works in WebKit?
+    canvas.classed('active', false);
+
+    // clear mouse event vars
+    resetMouseVars();
+}
+
+function spliceLinksForNode(node) {
+    const toSplice = links.filter((l) => l.source === node || l.target === node);
+    for (const l of toSplice) {
+        links.splice(links.indexOf(l), 1);
+    }
+}
+
+// only respond once per keydown
+let lastKeyDown = -1;
+
+function keydown(event) {
+    if (mode !== "state") return;
+    event.preventDefault();
+
+    if (lastKeyDown !== -1) return;
+    lastKeyDown = event.keyCode;
+
+    // ctrl
+    if (event.keyCode === 17) {
+        rect.call(drag);
+        canvas.classed('ctrl', true);
+        return;
+    }
+
+    if (!selectedNode && !selectedLink) return;
+
+    switch (event.keyCode) {
+        case 8: // backspace
+        case 46: // delete
+            if (selectedNode) {
+                nodes.splice(nodes.indexOf(selectedNode), 1);
+                spliceLinksForNode(selectedNode);
+            } else if (selectedLink) {
+                links.splice(links.indexOf(selectedLink), 1);
+            }
+            selectedLink = null;
+            selectedNode = null;
+            restart();
+            break;
+        case 66: // B
+            if (selectedLink) {
+                // set link direction to both left and right
+                selectedLink.left = true;
+                selectedLink.right = true;
+            }
+            restart();
+            break;
+        case 76: // L
+            if (selectedLink) {
+                // set link direction to left only
+                selectedLink.left = true;
+                selectedLink.right = false;
+            }
+            restart();
+            break;
+        case 82: // R
+            if (selectedNode) {
+                // toggle node reflexivity
+                selectedNode.reflexive = !selectedNode.reflexive;
+            } else if (selectedLink) {
+                // set link direction to right only
+                selectedLink.left = false;
+                selectedLink.right = true;
+            }
+            restart();
+            break;
+    }
+}
+
+function keyup(event) {
+    lastKeyDown = -1;
+
+    //if (mode !== "state") return;
+    // ctrl
+    if (event.keyCode === 17) {
+        rect.on('.drag', null);
+        canvas.classed('ctrl', false);
+    }
+}
+
+// app starts here
+bg.on('mousedown', mousedown)
+    .on('mousemove', mousemove)
+    .on('mouseup', mouseup);
+d3.select(window)
+    .on('keydown', keydown)
+    .on('keyup', keyup);
+pageSizer();
+restart();

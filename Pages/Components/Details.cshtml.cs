@@ -22,7 +22,7 @@ namespace ModuleManager.Pages.Components
 
         public ModuleManager.Models.Component Component { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             ModuleManager.Models.Component? _module = await Context.Components.FirstOrDefaultAsync(m => m.ComponentId == id);
 
@@ -47,7 +47,7 @@ namespace ModuleManager.Pages.Components
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id, Status status)
+        public async Task<IActionResult> OnPostAsync(string id, Status status)
         {
             var Component = await Context.Components.FirstOrDefaultAsync(
                                                       m => m.ComponentId == id);

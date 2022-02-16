@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 namespace ModuleManager.Pages.Modules
 {
@@ -26,8 +27,9 @@ namespace ModuleManager.Pages.Modules
         public ModuleManager.Models.Module Module { get; set; }
         public string Template { get; set; }
         public string ProcessTemplate { get; set; }
+        public List<SelectListItem> Templates { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             ModuleManager.Models.Module? module = await Context.Modules.FirstOrDefaultAsync(
                                                              m => m.ModuleId == id);
@@ -46,12 +48,21 @@ namespace ModuleManager.Pages.Modules
             }
             Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateId == Module.TemplateId)).Details;
             var process = (await Context.Processes.FirstOrDefaultAsync(m => m.ProcessId == Module.ProcessId));
-            ProcessTemplate = process.Details;
+            var templates = JsonSerializer.Deserialize<ICollection<string>>(process.RequiredModuleTemplates??"[]");
+            ProcessTemplate = ProcessTemplate ?? "";
+
+            var dbtemplates = await Context.Templates.AsNoTracking().Where(a => templates.Contains(a.TemplateId)).ToListAsync();
+            Templates=templates.Join(dbtemplates, a => a,b => b.TemplateId, (a, b) => new {b.Name,b.TemplateId}).Select(a =>
+                                  new SelectListItem
+                                  {
+                                      Value = a.TemplateId.ToString(),
+                                      Text = a.Name
+                                  }).ToList();
             //parse required templates IDs from process definition, lookup templates in the DB and provide the list to the UI.
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (!ModelState.IsValid)
             {

@@ -25,29 +25,43 @@ namespace ModuleManager.Pages.Components
         public ModuleManager.Models.Component Component { get; set; }
         [BindProperty]
         public string Template { get; set; }
+        public Module Module { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(string templateid,string moduleid)
         {
-            ModuleManager.Models.Component? Component = await Context.Components.FirstOrDefaultAsync(
-                                                             m => m.ComponentId == id);
-            if (Component == null)
-            {
-                return NotFound();
-            }
-
-            Template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateId == Component.TemplateId)).Details;
+            Component = await Context.Components.FirstOrDefaultAsync(
+                                                             m => m.TemplateId==templateid && m.ModuleId==moduleid);
+            Module= await Context.Modules.FirstOrDefaultAsync(
+                                                             m => m.ModuleId == moduleid);
+            var template = (await Context.Templates.FirstOrDefaultAsync(m => m.TemplateId == templateid));
+            Template = template.Details;
             var isAuthorized = await AuthorizationService.AuthorizeAsync(
-                                                      User, Component,
+                                                      User, Module,
                                                       ModuleOperations.Update);
             if (!isAuthorized.Succeeded)
             {
                 return Forbid();
             }
+            if (Module != null && template !=null && Component == null)
+            {
+                Component = new Component
+                {
+                    ComponentId = Guid.NewGuid().ToString("N"),
+                    ModuleId = moduleid,
+                    TemplateId = templateid,
+                    ContentType = template.ContentType,
+                    Details="{}"
+                };
+                Component.TimeStamp = DateTime.UtcNow;
+                Context.Components.Add(Component);
+                await Context.SaveChangesAsync();
+            }
+
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (!ModelState.IsValid)
             {

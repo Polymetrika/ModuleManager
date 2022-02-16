@@ -5,7 +5,7 @@ namespace ModuleManager.Models
     #region snippet1
     public class Module
     {
-        public int ModuleId { get; set; }
+        public string ModuleId { get; set; }
 
         // user ID from AspNetUser table.
         public string? OwnerID { get; set; }

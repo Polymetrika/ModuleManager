@@ -1,100 +1,85 @@
-﻿body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+﻿
+div#stateeditor {
+    border: 1px solid #808080;
+    background-color: #fff;
+    position: absolute;
+    width: 75%;
+    height: 60%;
+    z-index: 10;
+    left: 13%;
+    top: 10%;
+}
+#stateeditor > div {
+    max-height:80%;
+    overflow:auto;
 }
 
-p {
-    text-align: center;
-    overflow: overlay;
-    position: relative;
-}
-
-body {
-    -webkit-touch-callout: none;
+svg {
+    background-color: #cdcdcd;
+    cursor: default;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    -o-user-select: none;
     user-select: none;
-    background-color: rgb(248, 248, 248)
 }
 
-#toolbox {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    margin-bottom: 0.5em;
-    margin-left: 1em;
-    border: 2px solid #EEEEEE;
-    border-radius: 5px;
-    padding: 1em;
-    z-index: 5;
-}
-
-    #toolbox input {
-        width: 30px;
-        opacity: 0.4;
+    svg:not(.active):not(.ctrl) {
+        cursor: crosshair;
     }
-
-        #toolbox input:hover {
-            opacity: 1;
-            cursor: pointer;
-        }
-
-#hidden-file-upload {
-    display: none;
-}
-
-#download-input {
-    margin: 0 0.5em;
-}
-
-.conceptG text {
-    pointer-events: none;
-}
-
-marker {
-    fill: #333;
-}
-
-g.conceptG circle {
-    fill: #F6FBFF;
-    stroke: #333;
-    stroke-width: 2px;
-}
-
-g.conceptG:hover circle {
-    fill: rgb(200, 238, 241);
-}
-
-g.selected circle {
-    fill: rgb(250, 232, 255);
-}
-
-g.selected:hover circle {
-    fill: rgb(250, 232, 255);
-}
 
 path.link {
     fill: none;
-    stroke: #333;
-    stroke-width: 6px;
+    stroke: #000;
+    stroke-width: 4px;
     cursor: default;
 }
 
-    path.link:hover {
-        stroke: rgb(94, 196, 204);
-    }
+svg:not(.active):not(.ctrl) path.link {
+    cursor: pointer;
+}
 
-g.connect-node circle {
-    fill: #BEFFFF;
+path.link.selected {
+    stroke-dasharray: 10,2;
+}
+
+path.link.dragline {
+    pointer-events: none;
 }
 
 path.link.hidden {
     stroke-width: 0;
 }
 
-path.link.selected {
-    stroke: rgb(229, 172, 247);
+circle.node {
+    stroke-width: 1.5px;
+    cursor: pointer;
 }
+
+    circle.node.reflexive {
+        stroke: #000 !important;
+        stroke-width: 2.5px;
+    }
+
+text {
+    font: 12px sans-serif;
+    pointer-events: none;
+}
+
+    text.id {
+        text-anchor: middle;
+        font-weight: bold;
+    }
+
+.bg > rect.movable {
+    cursor: move;
+}
+
+.bg.grabbing > rect {
+    cursor: grabbing;
+}
+
+.bg.scaling > rect {
+    cursor: zoom-in;
+}
+

@@ -79,3 +79,10 @@ main {
     max-width:400px;
     margin-left:2em;
 }
+
+form .accordion>div{
+    min-height:400px;
+}
+.table{
+    width:100%
+}

@@ -226,11 +226,8 @@ namespace ModuleManager.Migrations
 
             modelBuilder.Entity("ModuleManager.Models.Component", b =>
                 {
-                    b.Property<int>("ComponentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ComponentId"), 1L, 1);
+                    b.Property<string>("ComponentId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ContentType")
                         .HasColumnType("int");
@@ -238,8 +235,9 @@ namespace ModuleManager.Migrations
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
+                    b.Property<string>("ModuleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -251,6 +249,7 @@ namespace ModuleManager.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("TemplateId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimeStamp")
@@ -265,11 +264,8 @@ namespace ModuleManager.Migrations
 
             modelBuilder.Entity("ModuleManager.Models.Module", b =>
                 {
-                    b.Property<int>("ModuleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModuleId"), 1L, 1);
+                    b.Property<string>("ModuleId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("BusinessDetails")
                         .HasColumnType("nvarchar(max)");
