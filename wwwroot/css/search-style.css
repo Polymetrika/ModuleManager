@@ -106,7 +106,7 @@
         max-width: 30px;
         text-align: center;
         cursor: pointer;
-    }
+    } 
 #searchselections {
     display: flex;
     min-width: calc(100% - 30px);
