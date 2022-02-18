@@ -1,13 +1,55 @@
-﻿// set up SVG for D3
+﻿/** TASKS SECTION - holds task definitions and links with framework */
+var tasks = []; //{name,evidence,performance,context}
+var indev = true;
+var maxrecords = 1000;
+var globalFramework, frameworkNavigation;
+
+function addobjectives() {
+    $("#searchpanel").dialog("open");
+    suspendkeylisteners = true;
+    showFramework("tag");
+}
+function showFramework(key) {
+    function displaySelections() {
+        //searchselections
+    }
+    frameworkNavigation = new FrameworkNavigation(
+        "#searchorganizer"
+        , key == "contextTags" ? "tag" : "classification,navigation"
+        , []
+        , (arr) => {
+            console.log(arr)
+            //arr.forEach(b => { addStringArrayItem(arrayitemlist, b.label, key, JSON.stringify(b.data)); })
+        }
+        , globalFramework);
+}
+function togglemenu() {
+    $("#taskmenu").toggleClass("menuminimized");
+    $(".leftarrow,.rightarrow,.menulabel").toggleClass("hidden");
+}
+function addtask() {
+    //raise task editor
+}
+
+//TODO:delete me
+function showMessage(text) {
+    alert(text);
+}
+
+/**SVG Section */
+
+
+
+// set up SVG for D3
 var width = 600;
 var height = 580;
-var mode = "view";
+var mode = "state";
 window.onresize = pageSizer;
 function pageSizer() {
     var w = window.innerWidth;
     var h = window.innerHeight;
-    width = w - 80;
-    height = h - 160;
+    width = w - 0;
+    height = h - 0;
     let exists = typeof svg !== "undefined";
     let hasattr = svg.attr;
     if (exists && hasattr ) {
@@ -15,24 +57,28 @@ function pageSizer() {
             .attr('width', width)
             .attr('height', height);
     }
+    if ($("#stateeditor").hasClass(".ui-dialog")){
+        $("#stateeditor").dialog("option", "width", width * .75);
+        $("#stateeditor").dialog("option", "height", height * .8);
+    }
 }
 const colors = d3.scaleOrdinal(["#fff4d9"]);//#fff4d9
 const linkGeneratorH = d3.linkHorizontal();
 const linkGeneratorV = d3.linkVertical();
 const linkGeneratorR = d3.linkRadial();
-
-const rectWidth = 40;
-const rectHeight = 40;
-
+const rectWidth = 45;
+const rectHeight = 35;
 const svg = d3.select("body")
     .append("svg");
+var suspendkeylisteners = false;
 pageSizer();
 const bg = svg.append("g")
     .classed("bg", true);
 
 bg.append('rect')
+    .classed("cursorfield", true)
     .attr("width","100%")
-    .attr("height","100%")
+    .attr("height", "100%")
     .attr("style","fill:#e5e5e5");
 
 const zoomed = bg
@@ -42,16 +88,16 @@ const canvas = zoomed.append("g")
     .classed("canvas", true);
 var zoom;
 
-function changemode(newmode) {
-    mode = newmode;
-    document.getElementById("currentmode").innerHTML = mode;
-    if (mode == "view") {
+function changemode(event, newmode) {
+
+    if (newmode == "view") {
+        mode = newmode;
         zoom = d3
             // base d3 pan & zoom behavior
             .zoom()
-            .filter((event => { return mode == "view";}))
+            .filter((e2 => { return mode == "view"; }))
             // limit zoom to between 20% and 200% of original size
-            .scaleExtent([0.2, 2])
+            .scaleExtent([0.2, 3])
             // apply pan & zoom transform to 'zoomed' element
             .on('zoom', ({ transform }) => {
                 bg
@@ -60,7 +106,7 @@ function changemode(newmode) {
             })
             // add 'grabbing' class to 'bg' element when panning;
             // add 'scaling' class to 'bg' element when zooming
-            .on('start', (event) => { 
+            .on('start', (event) => {
                 if (event.sourceEvent && event.sourceEvent.type) {
                     bg.classed(event.sourceEvent.type === 'wheel' ? 'scaling' : 'grabbing', true);
                 }
@@ -72,12 +118,25 @@ function changemode(newmode) {
             .call(zoom)
         d3.selectAll(".zoomed")
             .classed("zoomable", true);
+        d3.selectAll(".vizmode").classed("btn-warning", false).classed("btn-light", true);
+        d3.select("#modeview").classed("btn-light",false).classed("btn-warning", true);
+
+    } else if (newmode == "zoomreset") {
+        let oldmode = mode;
+        changemode(null, "view");
+        var transform = d3.zoomIdentity;
+        bg.transition().duration(750).call(zoom.transform, transform);
+        setTimeout(()=>changemode(null, oldmode),751);
+        
     } else {
+        mode = newmode;
         if (zoom && zoom.on) {
             zoom.on("zoom", null);
         }
         d3.selectAll(".zoomed")
             .classed("zoomable", false);
+        d3.selectAll(".vizmode").classed("btn-warning", false).classed("btn-light", true);
+        d3.select("#modestate").classed("btn-light", false).classed("btn-warning", true);
     }
 }
 
@@ -106,7 +165,9 @@ const force = d3.forceSimulation()
 // init D3 drag support
 const drag = d3.drag(event)
     // Mac Firefox doesn't distinguish between left/right click when Ctrl is held... 
-    .filter(() => event.button === 0 || event.button === 2)
+    .filter((event, d) => {
+        return (event.button === 0 || event.button === 2) && event.target.classList.contains("popup");
+    })
     .on('start', (event, d) => {
         if (!event.active) force.alphaTarget(0.3).restart();
 
@@ -168,6 +229,9 @@ let selectedLink = null;
 let mousedownLink = null;
 let mousedownNode = null;
 let mouseupNode = null;
+let activeState = null;
+let activeInteraction = null;
+let activeElement = null;
 
 function resetMouseVars() {
     mousedownNode = null;
@@ -192,12 +256,9 @@ function tick() {
         const targetY = d.target.y - (targetPadding * normY);
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             return linkGeneratorH({ source: [sourceX, sourceY], target: [targetX, targetY] });
-
         } else {
             return linkGeneratorV({ source: [sourceX, sourceY], target: [targetX, targetY] });
-
         }
-        //return linkGeneratorR({ source: [sourceX, sourceY], target: [targetX, targetY] });
     });
     rect.attr('transform', (d) => `translate(${d.x-rectWidth/2},${d.y-rectHeight/2})`);
 }
@@ -217,14 +278,6 @@ function restart() {
 
     // add new links
 
-    //d3.select("#multiLink")
-    //    .selectAll("path")
-    //    .data(multiLinkData)
-    //    .join("path")
-    //    .attr("d", linkGen)
-    //    .attr("fill", "none")
-    //    .attr("stroke", "black");
-
     path = path.enter().append('path')
         .attr('class', 'link')
         .attr("fill", "none")
@@ -243,13 +296,12 @@ function restart() {
             restart();
         })
         .merge(path);
-
     // rect (node) group
     // NB: the function arg is crucial here! nodes are known by id, not by index!
     rect = rect.data(nodes, (d) => d.id);
 
     // update existing nodes (reflexive & selected visual states)
-    rect.selectAll('rect')
+    rect.selectAll('rect.node')
         .style('fill', (d) => (d === selectedNode) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id))
         .classed('reflexive', (d) => d.reflexive);
 
@@ -261,6 +313,7 @@ function restart() {
 
     g.append('rect')
         .attr('class', 'node')
+        .attr("y",10)
         .attr('width', rectWidth)
         .attr('height', rectHeight)
         .style('fill', (d) => (d === selectedNode) ? d3.rgb(colors(d.id)).brighter().toString() : colors(d.id))
@@ -270,13 +323,13 @@ function restart() {
             if (mode != "state") return;
             if (!mousedownNode || d === mousedownNode) return;
             // enlarge target node
-            d3.select(this).attr('transform', 'scale(1.1)');
+            d3.select(this).classed('hover', true);
         })
         .on('mouseout', function (event, d) {
             if (mode != "state") return;
             if (!mousedownNode || d === mousedownNode) return;
             // unenlarge target node
-            d3.select(this).attr('transform', '');
+            d3.select(this).classed('hover', false);
         })
         .on('mousedown', (event, d) => {
             if (mode != "state") return;
@@ -307,7 +360,7 @@ function restart() {
             mouseupNode = d;
             if (mouseupNode !== mousedownNode) {
                 // unenlarge target node
-                d3.select(this).attr('transform', '');
+                d3.select(this).classed('hover', false);
 
                 // add link to graph (update if exists)
                 // NB: links are strictly source < target; arrows separately specified by booleans
@@ -329,20 +382,89 @@ function restart() {
             restart();
         });
 
+    g.append('rect')
+        .classed("popup", true)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight / 4)
+        .style('stroke', (d) => d3.rgb(colors(d.id)).darker().toString())
+        .on("mousedown", (event,d) => {
+        })
+        .on("mouseup", (event,d) => {
+            resetMouseVars();
+            restart();
+        });
+
+    g.append('rect')
+        .classed("editstate", true)
+        .attr("width", rectWidth/3)
+        .attr("height", rectHeight /2)
+        .attr("y", rectHeight *.75)
+        .style('stroke', (d) => "#aaa")
+        .on("mousedown", (event, d) => {
+            event.preventDefault();
+            activeState = d;
+            $("#stateeditor").dialog("option", "title", "Editing state: " + d.id).dialog("open");
+
+            $("#stateeditortabs").tabs({
+                heightStyle: "fill"
+            });
+
+            $("#elementaccordion").accordion({
+                heightStyle: "content",
+                collapsible: true,
+                active: false,
+            });
+            $("#elementdetailsaccordion").accordion({
+                heightStyle: "content",
+                collapsible: true,
+                active: false,
+            });
+            $("#statename").val(d.name || d.id);
+            $("#statedescription").val(d.description || null);
+            deleteElement();
+            suspendkeylisteners = true;
+        });
+    g.append('rect')
+        .classed("deletestate", true)
+        .attr("width", rectWidth / 3)
+        .attr("height", rectHeight / 2)
+        .attr("x", rectWidth * 2/ 3)
+        .attr("y", rectHeight * .75)
+        .style('stroke', (d) => "#aaa")
+        .on("mousedown", (event, d) => {
+            event.preventDefault();
+            event.stopPropagation();
+            //TODO: replace with message box
+            if (confirm("Are you sure you want to delete this state?")) {
+                selectedNode = d;
+                deleteActiveState();
+            }
+        });
+    g.append('rect')
+        .classed("copystate", true)
+        .attr("width", rectWidth / 3)
+        .attr("height", rectHeight / 2)
+        .attr("x", rectWidth / 3)
+        .attr("y", rectHeight * .75)
+        .style('stroke', (d) => "#aaa")
+        .on("mousedown", (event, d) => {
+            event.preventDefault();
+            event.stopPropagation();
+            selectedNode = d;
+            copyActiveState();
+        });
     // show node IDs
     g.append('text')
         .attr('x', rectWidth/2)
-        .attr('y', rectHeight/2)
+        .attr('y', rectHeight/1.5)
         .attr('class', 'id')
         .text((d) => d.id);
+    g.call(drag);
 
     rect = g.merge(rect);
-
     // set the graph in motion
     force
         .nodes(nodes);
-        //.force('link')
-        //.links(links);
 
     force.restart();
 }
@@ -362,7 +484,7 @@ function mousedown(event) {
     // because :active only works in WebKit?
     canvas.classed('active', true);
     if (mode !== "state") { return; }
-    else if (event.ctrlKey || mousedownNode || mousedownLink) return;
+    else if (event.ctrlKey || mousedownNode || mousedownLink || activeState) return;
 
     // insert new node at point
     const point = d3.pointer(event);
@@ -373,6 +495,17 @@ function mousedown(event) {
     const node = { id: ++lastNodeId, reflexive: false, x: point[0], y: point[1] };
     nodes.push(node);
     restart();
+}
+
+function copyActiveState() {
+    const newnode=JSON.parse(JSON.stringify(selectedNode))
+    newnode.id = ++lastNodeId;
+    newnode.x= selectedNode.x+width/20;
+    newnode.y = selectedNode.y + height / 20;
+    selectedNode = null;
+    nodes.push(newnode);
+    restart();
+
 }
 function mousemove(event) {
     if (mode !== "state") {
@@ -414,9 +547,20 @@ function spliceLinksForNode(node) {
 
 // only respond once per keydown
 let lastKeyDown = -1;
+function deleteActiveState() {
+    if (selectedNode) {
+        nodes.splice(nodes.indexOf(selectedNode), 1);
+        spliceLinksForNode(selectedNode);
+    } else if (selectedLink) {
+        links.splice(links.indexOf(selectedLink), 1);
+    }
+    selectedLink = null;
+    selectedNode = null;
+    restart();
 
+}
 function keydown(event) {
-    if (mode !== "state") return;
+    if (mode !== "state" || suspendkeylisteners) return;
     event.preventDefault();
 
     if (lastKeyDown !== -1) return;
@@ -434,15 +578,7 @@ function keydown(event) {
     switch (event.keyCode) {
         case 8: // backspace
         case 46: // delete
-            if (selectedNode) {
-                nodes.splice(nodes.indexOf(selectedNode), 1);
-                spliceLinksForNode(selectedNode);
-            } else if (selectedLink) {
-                links.splice(links.indexOf(selectedLink), 1);
-            }
-            selectedLink = null;
-            selectedNode = null;
-            restart();
+            deleteActiveState();
             break;
         case 66: // B
             if (selectedLink) {
@@ -475,9 +611,11 @@ function keydown(event) {
 }
 
 function keyup(event) {
+    if (suspendkeylisteners) {
+        return;
+    }
     lastKeyDown = -1;
 
-    //if (mode !== "state") return;
     // ctrl
     if (event.keyCode === 17) {
         rect.on('.drag', null);
@@ -485,12 +623,193 @@ function keyup(event) {
     }
 }
 
-// app starts here
-bg.on('mousedown', mousedown)
-    .on('mousemove', mousemove)
-    .on('mouseup', mouseup);
-d3.select(window)
-    .on('keydown', keydown)
-    .on('keyup', keyup);
-pageSizer();
-restart();
+function saveInteraction(add) {
+    activeElement.interactions = activeElement.interactions || [];
+    if (add || !activeInteraction) {
+        activeInteraction = {
+            name: $("#interactionname").val(),
+            description: $("#interactiondescription").val(),
+            datatype: $("#interactiontype").val()
+        };
+        activeElement.interactions.push(activeInteraction);
+    } else {
+        activeInteraction.name = $("#interactionname").val();
+        activeInteraction.description = $("#interactiondescription").val();
+        activeInteraction.datatype = $("#interactiontype").val();
+    }
+    updateInteractionList();
+    $("#interactiondetailsaccordion").show();
+    showMessage("Interaction saved");
+}
+function deleteInteraction() {
+    if (activeInteraction) {
+        activeElement.interactions.splice(activeElement.interactions.findIndex(a => a.name == activeInteraction.name), 1);
+        activeInteraction = null;
+    }
+    $("#interactionname").val("");
+    $("#interactiondescription").val("");
+    $("#interactiontype").val("");
+    updateInteractionList();
+}
+function editInteraction(event) {
+    activeElement.interactions = activeElement.interactions || [];
+    let name = event.target.dataset["value"];
+    activeInteraction = activeElement.interactions[activeElement.interactions.findIndex(a => a.name == name)];
+    $("#interactionname").val(activeInteraction.name);
+    $("#interactiondescription").val(activeInteraction.description);
+    $("#interactiontype").val(activeInteraction.datatype);
+    updateInteractionList();
+    $('#interactioneditorhead').click();
+}
+function updateInteractionList() {
+    $("#interactionlist").html("");
+    if (!activeElement) return;
+    activeElement.interactions = activeElement.interactions || [];
+    let html = "";
+    for (let e of activeElement.interactions) {
+        html += `<li data-value="${e.name}" data-type=${e.datatype} class="${e.datatype !== 'none' ? 'response' : ''}"><span class="accordionlabel" title="${e.description}">${e.name}</span></li>`;
+    }
+    $("#interactionlist").html(html);
+    $("#interactionlist li").click(editInteraction);
+}
+function saveElement(add) {
+    activeState.elements = activeState.elements || [];
+    if (add || !activeElement) {
+        activeElement = {
+            name: $("#elementname").val(),
+            description: $("#elementdescription").val(),
+            interactions: []
+        };
+        activeState.elements.push(activeElement);
+    } else {
+        activeElement.name = $("#elementname").val();
+        activeElement.description = $("#elementdescription").val();
+    }
+    updateElementList();
+    updateInteractionList();
+    $(".requireselement").show();
+    showMessage("Element saved");
+}
+function deleteElement() {
+    if (activeElement) {
+        activeState.elements.splice(activeState.elements.findIndex(a => a.name == activeElement.name), 1);
+        activeInteraction = null;
+        activeElement = null;
+    }
+    $("#interactionname").val("");
+    $("#interactiondescription").val("");
+    $("#interactiontype").val("none");
+    $("#elementname").val("");
+    $("#elementdescription").val("");
+    updateElementList();
+    updateInteractionList();
+    $(".requireselement").hide();
+}
+function editElement(event) {
+    activeState.elements = activeState.elements || [];
+    let name = event.target.dataset["value"];
+    activeElement = activeState.elements[activeState.elements.findIndex(a => a.name == name)];
+    $("#elementname").val(activeElement.name);
+    $("#elementdescription").val(activeElement.description);
+    updateInteractionList();
+    $("#elementeditorhead").click();
+    $(".requireselement").show();
+}
+function updateElementList() {
+    $("#elementlist").html("");
+    if (!activeState) return;
+    activeState.elements = activeState.elements || [];
+    let html = "";
+    for (let e of activeState.elements) {
+        html += `<li data-value="${e.name}"><span class="accordionlabel" title="${e.description}">${e.name}</span></li>`;
+    }
+    $("#elementlist").html(html);
+    $("#elementlist li").click(editElement);
+}
+
+const searchInit = (frameworkElements) => {
+    return lunr(function () {
+        this.ref("name");
+        this.field("description");
+        frameworkElements.forEach(function (frameworkElement) {
+            this.add(frameworkElement);
+        }, this);
+    });
+};
+
+$(function () {
+    mode = "state";
+    $("#modestate").addClass("btn-warning");
+    $("#stateeditor").dialog({
+        resizable: false,
+        height: height*.9,
+        width: width * .85,
+        title:"State editor",
+        modal: true,
+        autoOpen: false,
+        buttons: {
+            "OK": function () {
+                $(this).dialog("close");
+                activeState.name = $("#statename").val();
+                activeState.description = $("#statedescription").val();
+                suspendkeylisteners = false;
+                activeState = null;
+                activeInteraction = null;
+                activeElement = null;
+            },
+            Cancel: function () {
+                $(this).dialog("close");
+                suspendkeylisteners = false;
+                activeState = null;
+                activeInteraction = null;
+                activeElement = null;
+            }
+        }
+    });
+    $("#searchpanel").dialog({
+        resizable: false,
+        height: height * .9,
+        width: width * .85,
+        title: "Framework Explorer",
+        modal: true,
+        autoOpen: false,
+        buttons: {
+            "OK": function () {
+                $(this).dialog("close");
+                //TODO: update task editor with selected elements
+                suspendkeylisteners = false;
+            },
+            Cancel: function () {
+                $(this).dialog("close");
+                suspendkeylisteners = false;
+            }
+        }
+    });
+    // app starts here
+    bg.on('mousedown', mousedown)
+        .on('mousemove', mousemove)
+        .on('mouseup', mouseup);
+    d3.select(window)
+        .on('keydown', keydown)
+        .on('keyup', keyup);
+    $("#saveelement").click(() => saveElement());
+    $("#addelement").click(() => saveElement(true));
+    $("#deleteelement").click(() => deleteElement());
+    $("#saveinteraction").click(() => saveInteraction());
+    $("#addinteraction").click(() => saveInteraction(true));
+    $("#deleteinteraction").click(() => deleteInteraction());
+    $("#taskmenuaccordion").accordion();
+    d3.json("../json/AssessmentTaggingSchema.json")
+        .then((a, e) => {
+            globalFramework = a;
+            return globalFramework;
+        })
+        .then((a) => {
+
+        });
+
+
+    pageSizer();
+    restart();
+});
+

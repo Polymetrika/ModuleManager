@@ -1,18 +1,4 @@
 ﻿
-div#stateeditor {
-    border: 1px solid #808080;
-    background-color: #fff;
-    position: absolute;
-    width: 75%;
-    height: 60%;
-    z-index: 10;
-    left: 13%;
-    top: 10%;
-}
-#stateeditor > div {
-    max-height:80%;
-    overflow:auto;
-}
 
 svg {
     background-color: #cdcdcd;
@@ -51,12 +37,12 @@ path.link.hidden {
     stroke-width: 0;
 }
 
-circle.node {
+rect.node {
     stroke-width: 1.5px;
     cursor: pointer;
 }
 
-    circle.node.reflexive {
+    rect.node.reflexive {
         stroke: #000 !important;
         stroke-width: 2.5px;
     }
@@ -75,7 +61,7 @@ text {
     cursor: move;
 }
 
-.bg.grabbing > rect {
+.bg.grabbing > rect.cursorfield {
     cursor: grabbing;
 }
 

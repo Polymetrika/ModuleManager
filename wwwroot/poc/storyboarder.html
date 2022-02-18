@@ -1,21 +1,316 @@
 ﻿<!DOCTYPE HTML>
 <html>
 <head>
-    <link rel="stylesheet" href="../css/storyboarder.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+    <!-- Latest BS-Select compiled and minified CSS/JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+
+    <link rel="stylesheet" href="../css/storyboarder.css" />
+    <link href="../css/search-style.css" rel="stylesheet" />
+    <style>
+        .popup {
+            fill: #7d9ed3ff;
+            border: 3px solid #7d9ed3ff;
+            stroke: #7d9ed3ff;
+            stroke-width: 2px;
+            cursor: move;
+        }
+
+        .editstate {
+            fill: #8ce492;
+            stroke: #aaa;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .deletestate {
+            fill: #f33;
+            stroke: #aaa;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .copystate {
+            fill: #3353ff;
+            stroke: #aaa;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        rect.hover {
+            fill: #ffd800 !important;
+        }
+
+        .node:hover {
+            fill: #f9c702 !important;
+        }
+
+        div#stateeditor {
+            display: none;
+            background-color: #fff;
+            padding: 0;
+            font-size: 0.85em;
+        }
+
+        #stateeditor > div {
+            overflow: auto;
+        }
+
+        #statedescription, #elementdescription, #statename, #interactiondescription {
+            width: 100%;
+            margin: 5px;
+        }
+
+        .ui-dialog {
+            max-width: 75% !important;
+        }
+
+        #elementlistholder {
+            min-height: 3em;
+            max-height: 9em;
+            overflow: auto;
+        }
+
+        #elementlist li, #interactionlist li {
+            list-style-type: none;
+            cursor: pointer;
+            margin-left: -2em;
+            padding: 2px 10px;
+            background-color: #e8e4e4;
+        }
+
+        .accordionholder > div {
+            display: none;
+        }
+
+        li span {
+            pointer-events: none;
+        }
+
+
+        .menu {
+            width: 200px;
+        }
+
+        .menuminimized {
+            width: 45px;
+            transition-duration: .5s;
+        }
+
+            .menuminimized:hover {
+                width: 200px;
+                transition-duration: .5s;
+            }
+
+        #taskmenu {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            height: calc(100% - 60px);
+            background-color: #fff;
+            overflow-y: auto;
+        }
+
+        #minimizemenu, #addtask,#addobjectives {
+            width: calc(100% - 10px);
+            margin: 0 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .menuheader {
+            /*max-width: max(0px, calc((100% - 120px)*999));*/
+            margin: 5px 10px;
+            overflow: hidden;
+        }
+
+        /*JQUERY-UI Overrides*/
+        .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+            border: 1px solid #6f84c8;
+            background: #6d91b6;
+            font-weight: normal;
+            color: #fff;
+        }
+
+        .ui-accordion .ui-accordion-content {
+            padding: .5em .75em;
+            border-top: 0;
+            overflow: auto;
+        }
+
+        /*Bootstrap overrides*/
+        .btn-success {
+            color: #fff;
+            background-color: #5d9b6b;
+            border-color: #61ab72;
+        }
+
+        .btn {
+            margin: 3px 0;
+        }
+
+        .btn-primary {
+            border: 1px solid #6f84c8;
+            background: #6d91b6;
+            font-weight: normal;
+            color: #fff;
+        }
+
+    </style>
 </head>
 
 <body onresize="if(typeof pageResizer!=='undefined') pageResizer()">
+    <div id="taskmenu" class="menu">
+        <button id="minimizemenu" class="btn btn-outline-dark" onclick="togglemenu();"><i class="leftarrow fa-solid fa-left-long"></i><i class="rightarrow fa-solid fa-right-long hidden"></i></button>
+        <div id="taskmenuaccordion">
+            <h3 class="menuheader"><i class="fa-solid fa-list-check"></i> <span class="menulabel">Objectives</span></h3>
+            <div>
+                <button id="addobjectives" class="btn btn-primary" onclick="addobjectives()" title="Add objectives"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <h3 class="menuheader"><i class="fa-solid fa-pen-to-square"></i> <span class="menulabel">Tasks</span></h3>
+            <div>
+                <button id="addtask" class="btn btn-primary" onclick="addtask()" title="Add tasks"><i class="fa-solid fa-plus"></i></button>
+                <div id="tasklist">
 
-    <div id="toolbox" style="position:absolute;right:80px">
-        <input type="file" id="hidden-file-upload">
-        <span id="currentmode"></span>
-        <button onclick="changemode('view')" class="btn btn-lg btn-light"><i class="fa-solid fa-magnifying-glass-location"></i></button>
-        <button onclick="changemode('state')" class="btn btn-lg btn-light"><i class="fa-solid fa-pen-to-square"></i></button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="stateeditor"></div>
+    <div id="toolbox" style="position:absolute;right:10px;top:10px;">
+        <span id="currentmode"></span>
+        <button onclick="changemode(this,'zoomreset')" id="modereset" class="vizmode btn btn-lg btn-light" title="reset zoom"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <button onclick="changemode(this,'view')" id="modeview" class="vizmode btn btn-lg btn-light" title="zoom and pan mode"><i class="fa-solid fa-magnifying-glass-location"></i></button>
+        <button onclick="changemode(this,'state')" id="modestate" class="vizmode btn btn-lg btn-light" title="editing mode"><i class="fa-solid fa-pen-to-square"></i></button>
+    </div>
+    <div id="searchpanel" class="popup">
+        <div id="searchcontents">
+            <div id="searchbar">
+                <div>
+                    <summary>
+                        <input type="text" placeholder="full text search" class="searchframework" name="searchframework" id="searchframework"
+                               oninput="frameworkNavigation.searchFrameworkHandler()" />
+                        <button title="search" onclick="frameworkNavigation.searchFrameworkHandler()">
+                            <svg width="13" height="13" viewBox="0 0 13 13">
+                                <title>search</title>
+                                <path d="m4.8495 7.8226c0.82666 0 1.5262-0.29146 2.0985-0.87438 0.57232-0.58292 0.86378-1.2877 0.87438-2.1144 0.010599-0.82666-0.28086-1.5262-0.87438-2.0985-0.59352-0.57232-1.293-0.86378-2.0985-0.87438-0.8055-0.010599-1.5103 0.28086-2.1144 0.87438-0.60414 0.59352-0.8956 1.293-0.87438 2.0985 0.021197 0.8055 0.31266 1.5103 0.87438 2.1144 0.56172 0.60414 1.2665 0.8956 2.1144 0.87438zm4.4695 0.2115 3.681 3.6819-1.259 1.284-3.6817-3.7 0.0019784-0.69479-0.090043-0.098846c-0.87973 0.76087-1.92 1.1413-3.1207 1.1413-1.3553 0-2.5025-0.46363-3.4417-1.3909s-1.4088-2.0686-1.4088-3.4239c0-1.3553 0.4696-2.4966 1.4088-3.4239 0.9392-0.92727 2.0864-1.3969 3.4417-1.4088 1.3553-0.011889 2.4906 0.45771 3.406 1.4088 0.9154 0.95107 1.379 2.0924 1.3909 3.4239 0 1.2126-0.38043 2.2588-1.1413 3.1385l0.098834 0.090049z">
+                                </path>
+                            </svg>
+                        </button>
+                    </summary>
+                    <div id="searchorganizer">
+                    </div>
+                </div>
+            </div>
+            <div id="searchresult">search result</div>
+        </div>
+        <div id="searchselections">
+
+        </div>
+    </div>
+    <div id="taskeditor">
+        <div id="evidenceselection">
+
+            <table id="selectedinteractions"></table>
+        </div>
+        <div id="tagselection"></div>
+    </div>
+    <div id="stateeditor">
+        <div id="stateeditortabs">
+            <ul>
+                <li><a href="#stateproperties">State Properties</a></li>
+                <li><a href="#stateelements">State elements</a></li>
+            </ul>
+            <div id="stateproperties">
+                <div>
+                    <label for="statename">Name: </label><input id="statename" />
+                </div>
+                <div>
+                    <label for="statedescription">Description: </label><br />
+                    <textarea id="statedescription"></textarea>
+                </div>
+            </div>
+            <div id="stateelements">
+                <div id="elementtemplate">
+                    <div id="elementaccordion" class="accordionholder">
+                        <h3 id="elementeditorhead">Element Editor</h3>
+                        <div id="elementdescriptionholder">
+                            <div id="elementdetailsaccordion" class="accordionholder">
+                                <h4 id="elementdetailshead">General Properties</h4>
+                                <div>
+                                    Elements define the assessment experience. Each state should have one or more elements. Each element must perform at least one of the following purposes: convey information, allow the experience to respond to learner actions, and/or collect evidence of learner behaviours. Describe each element in terms of its physical properties, its purpose(s), and the interactions it allows and records.
+                                    <div>
+                                        <button class="btn btn-sm btn-success" id="addelement">Save new</button>
+                                        <button class="btn btn-sm btn-success" id="saveelement">Save</button>
+                                        <button class="btn btn-sm btn-danger" id="deleteelement">Delete</button>
+                                    </div>
+                                    <label for="elementname">Name:&nbsp;</label><input id="elementname" /><br />
+                                    <label for="elementdescription">Description: </label><br />
+                                    <textarea id="elementdescription" placeholder="What type of element is it? What properties does it have (appearance, size, position, etc.)?"></textarea>
+                                </div>
+                                <h4 id="interactioneditorhead" class="requireselement">Interaction Editor</h4>
+                                <div class="requireselement">
+                                    Interactions define how the learner may modify the elements in the state. Some interactions may record data created by the learner's actions. Describe each interaction in terms of what the learner action is and how properties (appearance, behaviour, position, shape, etc.) of the current element and other elements in the state change in response.
+                                    <div>
+                                        <button class="btn btn-sm btn-success" id="addinteraction">Save new</button>
+                                        <button class="btn btn-sm btn-success" id="saveinteraction">Save</button>
+                                        <button class="btn btn-sm btn-danger" id="deleteinteraction">Delete</button>
+                                    </div>
+                                    <label for="interactionname">Name:&nbsp;</label><input id="interactionname" /><br />
+                                    <label for="interactiontype">Data record:&nbsp;</label><select id="interactiontype" title="what type of data are produced by the interaction">
+                                        <option value="none">none</option>
+                                        <option value="text">text</option>
+                                        <option value="number">number</option>
+                                        <option value="stringarray">list of text</option>
+                                        <option value="numberarray">list of numbers</option>
+                                        <option value="image">image</option>
+                                        <option value="video">video</option>
+                                        <option value="json">JSON object (key:value pairs)</option>
+                                    </select>
+                                    <textarea id="interactiondescription" placeholder="describe the nature of the interaction: what does the learner do and how does the element respond?"></textarea>
+
+                                </div>
+                                <h4 id="interactionlisthead" class="requireselement">Interaction list</h4>
+                                <div id="interactionlistholder" class="requireselement">
+                                    <ul id="interactionlist">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 id="elementlisthead">Element list</h3>
+                        <div id="elementlistholder">
+                            <ul id="elementlist">
+                                <li>temp</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.5.0/d3.min.js"></script>
-    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.min.js"></script>
+    <script src="https://unpkg.com/lunr/lunr.js"></script>
+    <script src="https://unpkg.com/underscore@1.13.1/underscore-umd-min.js"></script>
+    <script src="../js/site.js"></script>
+    <script src="../js/frameworkNavigation.js"></script>
+    <script src="../js/stopwords.js"></script>
+    <script src="../js/storyboarder.js"></script>
+</body>
+<!--
     Copyright (c) 2022 Fernando Cartwright
 
     Permission is hereby granted, free of charge, to any person obtaining
@@ -37,30 +332,26 @@
     OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     -->
-    <!--
-    Copyright (c) 2013 Ross Kirsling
+<!--
+Copyright (c) 2013 Ross Kirsling
 
-    Permission is hereby granted, free of charge, to any person obtaining
-    a copy of this software and associated documentation files (the
-    "Software"), to deal in the Software without restriction, including
-    without limitation the rights to use, copy, modify, merge, publish,
-    distribute, sublicense, and/or sell copies of the Software, and to
-    permit persons to whom the Software is furnished to do so, subject to
-    the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-    The above copyright notice and this permission notice shall be
-    included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    -->
-    <!--<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>-->
-    <script src="../js/storyboarder.js"></script>
-</body>
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
 </html>

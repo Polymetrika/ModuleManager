@@ -1,0 +1,180 @@
+#searchpanel{
+    font-size:0.85em;
+}
+    #searchpanel #searchorganizer{
+        width:250px;
+    }
+    #searchpanel .breadcrumbtitle {
+        white-space: nowrap;
+        width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+    }
+  #searchpanel div.breadcrumbtitle{
+      text-decoration: underline;
+      color:blue;
+  }
+  #searchpanel button.applytag{
+    position: relative;
+    background-color: #4CAF50;
+    border: none;
+    font-size: 14px;
+    color: #FFFFFF;
+    padding: 5px 10px;
+    width: 70px;
+    text-align: center;
+    transition-duration: 0.4s;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 5px;
+    margin:3px;
+  }
+  #searchpanel button.applytag:hover{
+    background-color: #317c33;
+  }
+  #searchpanel button.applytag:after{
+    content: "";
+    background: #f1f1f1;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -20px !important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+  }
+  #searchpanel button.applytag:active:after{
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+  }
+  #searchpanel details>div{
+      margin-left:10px;
+      max-height:300px;
+      overflow-y: auto;
+  }
+  #searchpanel details {
+    font: 16px "Open Sans", Calibri, sans-serif;
+  }
+  
+  #searchpanel details > summary {
+    padding: 2px 6px;
+    width: 15em;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #searchpanel details > p {
+    border-radius: 0 0 10px 10px;
+    background-color: #eee;
+    padding: 2px 6px;
+    margin: 0;
+  }
+  
+  #searchpanel details[open] > summary {
+    background-color: #d2d7f8;
+  }
+
+  #searchpanel details>div>details{
+     margin-left:15px;
+     background-color: #eee;
+ }
+    #searchpanel .frameworkselection {
+        display: flex;
+        justify-content: space-between;
+        background-color: #628bd9;
+        color: #fff;
+        width: calc(100% - 35px);
+        margin: 1px 3px;
+        padding: 2px;
+    }
+    #searchpanel .dlabel {
+        width: calc(100% - 20px);
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        max-height: 1.6em;
+    }
+    #searchpanel .deleteframeworkselection {
+        background-color: #f00;
+        color: #fff;
+        min-width: 30px;
+        max-width: 30px;
+        text-align: center;
+        cursor: pointer;
+    }
+#searchselections {
+    display: flex;
+    min-width: calc(100% - 30px);
+    flex-direction: column;
+    overflow: auto;
+    max-height: calc(60% - 45px);
+}
+#searchcontents {
+    display: flex;
+    min-width: 100%;
+    max-height: calc(60% - 60px);
+}
+#searchbar {
+    margin-top: 2px;
+    max-width: 350px;
+    text-align: left;
+    margin-left: 0;
+    border: 1px solid #191f58;
+    padding: 10px;
+    max-height: 650px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+    #searchbar input[type="text"] {
+        width:calc(100% - 50px);
+    }
+  #searchresult{
+      display: none;
+      flex-grow:2;
+      text-align: left;
+      margin-left:10px;
+      border:1px solid #191f58;
+      padding:10px;
+      max-height:650px;
+      max-width: calc(100% - 300px);
+      overflow-y: auto;
+  }
+  button svg{
+      pointer-events: none;
+  } 
+
+ /*  
+ button.help{
+    content:"i";
+    position: relative;
+    background-color: #0b2fa3;
+    border: none;
+    font-size: 14px;
+    font-family:'Times New Roman', Times, serif;
+    font-weight:bolder;
+    color: #fbfbfd;
+    padding: 5px 10px;
+    border-radius: 25px;
+    width: 30px;
+    text-align: center;
+    transition-duration: 0.4s;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  button.help:hover{
+    background-color: #191f58;
+  }
+  button.help:active{
+    opacity: 1;
+    transition: 0s;
+    color: #0b2fa3;
+    background-color: #aea8ff;
+    border-color: #0b2fa3;
+    border-width: 1px;
+  } */
